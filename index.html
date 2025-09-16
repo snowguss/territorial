@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestão de Territórios</title>
+  <title>Territorial - Gestão de Territórios</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -35,103 +35,155 @@
     }
 
     .app-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background-color: var(--surface-color);
-      color: var(--primary-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      z-index: 1001;
-      height: 64px;
-      box-sizing: border-box;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: var(--surface-color);
+        color: var(--primary-color);
+        display: grid;
+        grid-template-columns: 64px 1fr 64px;
+        align-items: center;
+        padding: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        z-index: 1001;
+        height: 64px;
+        box-sizing: border-box;
+    }
+
+    .app-header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+        font-weight: 500;
     }
 
     .header-btn {
-      background: none;
-      border: none;
-      font-size: 28px;
-      color: var(--primary-color);
-      cursor: pointer;
-      padding: 8px;
-      box-shadow: none;
+        width: 64px;
+        height: 64px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--primary-color);
+        cursor: pointer;
+        padding: 0;
+        box-shadow: none;
+        transition: background-color 0.2s;
+    }
+
+    .header-btn:hover {
+        background-color: rgba(103, 80, 164, 0.08);
     }
 
     .container {
-      background-color: var(--surface-color);
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 600px;
-      margin: 20px;
-      transition: margin-right 0.3s ease-in-out;
+        background-color: var(--surface-color);
+        padding: 32px;
+        border-radius: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 1200px;
+        margin: 24px;
+        display: flex;
+        gap: 32px;
     }
 
-    .map-preview-container {
-      width: 40%;
-      max-width: 500px;
-      margin: 20px 20px 20px 0;
-      position: sticky;
-      top: 84px; /* 64px header + 20px margin */
-      height: calc(100vh - 104px);
-      display: flex;
-      flex-direction: column;
-      background-color: var(--surface-color);
-      border-radius: 16px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      overflow: hidden;
+    .form-container {
+      flex: 1;
+      min-width: 300px;
     }
 
-    .map-header {
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--outline-color);
-    }
-
-    .map-header h3 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    #map-iframe {
-      flex-grow: 1;
-      border: none;
+    .list-container {
+      flex: 1.5;
+      min-width: 300px;
     }
 
     @media (max-width: 1024px) {
-      .map-preview-container {
-        display: none; /* Esconde o mapa em telas menores por simplicidade */
+      .container {
+        flex-direction: column;
       }
     }
 
+    h1, h2 {
+      color: var(--primary-color);
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 24px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
     .menu {
-      position: fixed;
-      top: 64px;
-      right: 0;
-      background-color: var(--surface-color);
-      box-shadow: -2px 2px 5px rgba(0,0,0,0.1);
-      border-radius: 0 0 0 12px;
-      padding: 10px;
-      z-index: 1000;
-      width: 250px;
+        position: fixed;
+        top: 64px;
+        right: 0;
+        background-color: var(--surface-color);
+        box-shadow: -2px 2px 8px rgba(0,0,0,0.1);
+        border-radius: 0 0 0 16px;
+        padding: 12px;
+        z-index: 1000;
+        width: 280px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .menu:not(.hidden) {
+        transform: translateX(0);
     }
 
     .menu button {
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
-      text-align: left;
-      padding: 10px 15px;
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+        text-align: left;
+        padding: 12px 16px;
+        transition: background-color 0.2s;
+        border-radius: 12px;
     }
 
-    .hidden { display: none; }
+    .menu button:hover {
+        background-color: rgba(103, 80, 164, 0.85);
+    }
+
+    .territorio {
+        background-color: var(--surface-container-high);
+        border: 1px solid transparent;
+        padding: 20px;
+        margin: 12px 0;
+        border-radius: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .territorio:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .bairro-grupo {
+        margin-bottom: 32px;
+    }
+    
+    .bairro-grupo-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+    }
+    
+    .bairro-grupo-header:hover {
+        background-color: rgba(103, 80, 164, 0.08);
+    }
 
     .form-group {
       margin-bottom: 16px;
@@ -158,70 +210,30 @@
     }
 
     button {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 500;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background-color 0.3s, box-shadow 0.3s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 24px;
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     button:hover {
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transform: translateY(-1px);
     }
 
-    .territorio {
-      background-color: var(--surface-container-high);
-      border: 1px solid transparent;
-      padding: 16px;
-      margin: 10px 0;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+    button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    .territorio-botoes {
-      display: flex;
-      align-items: center;
-      flex-shrink: 0; /* Impede que os botões quebrem linha em telas menores */
-    }
-
-    .territorio-header {
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--outline-color);
-    }
-
-    .territorio-body {
-      display: none; /* Começa recolhido */
-      padding-top: 16px;
-    }
-
-    .last-sent {
-      font-size: 0.8rem;
-      color: #555;
-      margin-top: 4px;
-    }
-
-    .edit-addr-btn, .edit-btn, .whatsapp-btn, .route-btn, .delete-btn {
-      background: none;
-      border: none;
-      color: var(--primary-color);
-      cursor: pointer;
-      font-size: 24px;
-      padding: 0;
-      margin-left: 10px;
-      line-height: 1;
-    }
+    .hidden { display: none; }
 
     /* Estilos da Modal */
     .modal {
@@ -258,96 +270,259 @@
       padding: 8px;
       border-bottom: 1px solid #eee;
     }
+
+    .profile-info {
+      margin-bottom: 16px;
+    }
+
+    .bairros-lista {
+        list-style: none;
+        padding: 0;
+        margin: 8px 0;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid var(--outline-color);
+        border-radius: 8px;
+        display: none;
+    }
+
+    .bairros-lista.visible {
+        display: block;
+    }
+
+    .bairros-lista li {
+        padding: 8px 16px;
+        cursor: pointer;
+    }
+
+    .bairros-lista li:hover {
+        background-color: var(--surface-container-high);
+    }
+
+    .input-with-toggle {
+        display: flex;
+        gap: 8px;
+    }
+
+    .toggle-btn {
+        padding: 0 12px;
+        min-width: 40px;
+    }
+
+    .bairro-grupo {
+        margin-bottom: 24px;
+    }
+    
+    .bairro-grupo-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        cursor: pointer;
+    }
+    
+    .bairro-grupo-header h3 {
+        margin: 0;
+        color: var(--primary-color);
+    }
+    
+    .bairro-grupo-header .toggle-icon {
+        margin-right: 8px;
+        color: var(--primary-color);
+    }
+    
+    .bairro-grupo-content {
+        margin-left: 16px;
+    }
+
+    .container.home .form-container {
+        display: none;
+    }
+    
+    .container.home .list-container {
+        flex: 1;
+    }
+
+    .territorio-header {
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        gap: 16px;  /* Add gap between title and buttons */
+        border-bottom: 1px solid var(--outline-color);
+    }
+
+    .edit-addr-btn, .edit-btn, .whatsapp-btn, .delete-btn {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        cursor: pointer;
+        font-size: 20px;  /* Smaller icon size */
+        width: 32px;      /* Fixed width */
+        height: 32px;     /* Fixed height */
+        padding: 0;
+        margin: 0;
+        line-height: 1;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .territorio-botoes {
+        display: flex;
+        align-items: center;
+        gap: 4px;  /* Space between buttons */
+        flex-shrink: 0;
+        margin-left: auto;  /* Push buttons to the right */
+    }
+
+    .territorio-info {
+        flex: 1;
+        min-width: 0;  /* Allows text to truncate if needed */
+    }
+
+    .welcome-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;  /* Change this from 'flex' to 'none' */
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+
+    .welcome-modal:not(.hidden) {
+        display: flex;  /* Add this new rule */
+    }
+
+    .welcome-content {
+        background: var(--surface-color);
+        padding: 32px;
+        border-radius: 24px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .welcome-content h2 {
+        margin-top: 0;
+        text-align: center;
+    }
   </style>
 </head>
 <body>
   <header class="app-header">
     <button id="home-btn" class="header-btn" onclick="mostrarTela('home')">&#127968;</button>
-    <h1>Gestão de Territórios</h1>
+    <h1>Territorial</h1>
     <button id="hamburger-btn" class="header-btn" onclick="toggleHamburgerMenu()">&#9776;</button>
   </header>
 
   <div id="hamburger-menu" class="menu hidden">
     <button onclick="mostrarTela('criar'); toggleHamburgerMenu();">Criar Território</button>
     <button onclick="mostrarTela('endereco'); toggleHamburgerMenu();">Adicionar Endereço</button>
-    <button onclick="exportarTerritorios(); toggleHamburgerMenu();">Exportar</button>
-    <button onclick="document.getElementById('import-file').click(); toggleHamburgerMenu();">Importar</button>
+    <button onclick="mostrarTela('config'); toggleHamburgerMenu();">Configurações</button>
     <button onclick="reorganizarTerritorios(); toggleHamburgerMenu();">Reorganizar Tudo</button>
-    <input type="file" id="import-file" class="hidden" onchange="importarTerritorios(event)" accept=".json">
   </div>
 
   <div class="main-wrapper">
-    <div class="container">
-      <!-- Tela Criar Território -->
-      <div id="telaCriar" class="hidden">
-        <h2>Criar Território</h2>
-        <div class="form-group">
-          <label for="bairro">Bairro:</label>
-          <input type="text" id="bairro">
+    <div class="container home">
+      <div class="form-container">
+        <!-- Tela Criar Território -->
+        <div id="telaCriar" class="hidden">
+          <h2>Criar Território</h2>
+          <div class="form-group">
+            <label for="bairro">Bairro:</label>
+            <div class="input-with-toggle">
+              <input type="text" id="bairro">
+              <button class="toggle-btn" onclick="toggleBairrosList(event)">▼</button>
+            </div>
+            <ul id="bairrosList" class="bairros-lista"></ul>
+          </div>
+          <div class="form-group">
+            <label for="nomeTerritorio">Nome do Território:</label>
+            <input type="text" id="nomeTerritorio">
+          </div>
+          <button onclick="criarTerritorio()">Salvar Território</button>
         </div>
-        <div class="form-group">
-          <label for="nomeTerritorio">Nome do Território:</label>
-          <input type="text" id="nomeTerritorio">
+
+        <!-- Tela Adicionar Endereço -->
+        <div id="telaEndereco" class="hidden">
+          <h2>Adicionar Endereço</h2>
+          <div class="form-group">
+            <label for="territorioManual">Adicionar ao Território (Opcional):</label>
+            <select id="territorioManual" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--outline-color);">
+              <option value="">Automático</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ruaInput">Rua:</label>
+            <input type="text" id="ruaInput" list="ruas-list">
+            <datalist id="ruas-list"></datalist>
+          </div>
+          <div class="form-group">
+            <label for="numeroInput">Número:</label>
+            <input type="text" id="numeroInput">
+          </div>
+          <div class="form-group">
+            <label for="bairroEndereco">Bairro:</label>
+            <input type="text" id="bairroEndereco" list="bairros-list">
+            <datalist id="bairros-list"></datalist>
+          </div>
+          <button onclick="adicionarEndereco()">Adicionar</button>
         </div>
-        <button onclick="criarTerritorio()">Salvar Território</button>
+
+        <!-- Tela Configurações -->
+        <div id="telaConfig" class="hidden">
+          <h2>Configurações</h2>
+          <!-- View mode -->
+          <div id="viewProfile" class="hidden">
+            <div class="profile-info">
+              <p><strong>Nome:</strong> <span id="viewNome"></span></p>
+              <p><strong>Congregação:</strong> <span id="viewCongregacao"></span></p>
+              <p><strong>Cidade:</strong> <span id="viewCidade"></span></p>
+            </div>
+            <button onclick="toggleProfileMode('edit')" style="margin-bottom: 24px;">Editar Perfil</button>
+          </div>
+          
+          <!-- Edit mode -->
+          <div id="editProfile">
+            <div class="form-group">
+              <label for="nomePublicador">Nome do Publicador:</label>
+              <input type="text" id="nomePublicador">
+            </div>
+            <div class="form-group">
+              <label for="congregacao">Congregação:</label>
+              <input type="text" id="congregacao">
+            </div>
+            <div class="form-group">
+              <label for="cidadePadrao">Cidade:</label>
+              <input type="text" id="cidadePadrao">
+            </div>
+            <button onclick="salvarPerfil()">Salvar Perfil</button>
+          </div>
+          
+          <h3 style="margin-top: 24px;">Gerenciamento de Dados</h3>
+          <button onclick="exportarDados()">Exportar Dados</button>
+          <button onclick="document.getElementById('import-file').click();">Importar Dados</button>
+          <input type="file" id="import-file" class="hidden" onchange="importarDados(event)" accept=".json">
+        </div>
       </div>
 
-      <!-- Tela Adicionar Endereço -->
-      <div id="telaEndereco" class="hidden">
-        <h2>Adicionar Endereço</h2>
-        <div class="form-group">
-          <label for="territorioManual">Adicionar ao Território (Opcional):</label>
-          <select id="territorioManual" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--outline-color);">
-            <option value="">Automático</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="ruaInput">Rua:</label>
-          <input type="text" id="ruaInput" list="ruas-list">
-          <datalist id="ruas-list"></datalist>
-        </div>
-        <div class="form-group">
-          <label for="numeroInput">Número:</label>
-          <input type="text" id="numeroInput">
-        </div>
-        <div class="form-group">
-          <label for="bairroEndereco">Bairro:</label>
-          <input type="text" id="bairroEndereco" list="bairros-list">
-          <datalist id="bairros-list"></datalist>
-        </div>
-        <div class="form-group">
-          <label for="cidadeEndereco">Cidade:</label>
-          <input type="text" id="cidadeEndereco" list="cidades-list">
-          <datalist id="cidades-list"></datalist>
-        </div>
-        <div class="form-group">
-          <label for="estadoEndereco">Estado (UF):</label>
-          <input type="text" id="estadoEndereco" list="estados-list">
-          <datalist id="estados-list"></datalist>
-        </div>
-        <div class="form-group">
-          <label for="notasEndereco">Notas:</label>
-          <input type="text" id="notasEndereco">
-        </div>
-        <button onclick="adicionarEndereco()">Adicionar</button>
+      <div class="list-container">
+        <h2 id="sugestoes-titulo" class="hidden">Sugestão de Envio</h2>
+        <div id="sugestoesTerritorios"></div>
+
+        <h2 id="recentes-titulo" class="hidden">Enviados Recentemente</h2>
+        <div id="recentesTerritorios"></div>
+
+        <h2 id="territorios-titulo">Territórios</h2>
+        <div id="listaTerritorios"></div>
       </div>
-
-      <h2 id="sugestoes-titulo" class="hidden">Sugestão de Envio</h2>
-      <div id="sugestoesTerritorios"></div>
-
-      <h2 id="recentes-titulo" class="hidden">Enviados Recentemente</h2>
-      <div id="recentesTerritorios"></div>
-
-      <h2>Territórios</h2>
-      <div id="listaTerritorios"></div>
-    </div>
-
-    <div id="map-preview" class="map-preview-container hidden">
-      <div class="map-header">
-        <h3 id="map-title">Prévia da Rota</h3>
-        <button class="modal-close" style="position: static; float: none;" onclick="fecharPreviaMapa()">&times;</button>
-      </div>
-      <iframe id="map-iframe" src="" allowfullscreen="" loading="lazy"></iframe>
     </div>
   </div>
 
@@ -360,49 +535,163 @@
     </div>
   </div>
 
-  <script>
-    let territorios = {};
-    const API_KEY = "AIzaSyAHQ5Hofq2sbidxTu8CErNAigz0BfQ4qKg";
+  <!-- Modal de Boas-Vindas -->
+  <div id="welcomeModal" class="welcome-modal hidden">
+    <div class="welcome-content">
+        <h2>Bem-vindo ao Territorial!</h2>
+        <p>Para começar, precisamos de algumas informações:</p>
+        <div class="form-group">
+            <label for="initialNome">Seu Nome:</label>
+            <input type="text" id="initialNome" required>
+        </div>
+        <div class="form-group">
+            <label for="initialCongregacao">Sua Congregação:</label>
+            <input type="text" id="initialCongregacao" required>
+        </div>
+        <div class="form-group">
+            <label for="initialCidade">Sua Cidade:</label>
+            <input type="text" id="initialCidade" required>
+        </div>
+        <button onclick="salvarPerfilInicial()">Começar</button>
+    </div>
+  </div>
 
-    // Carregar territórios do LocalStorage ao iniciar
-    window.onload = function() {
-      carregarTerritorios();
+  <script>
+    let dadosApp = {
+        perfil: {
+            nome: '',
+            congregacao: '',
+            cidade: ''
+        },
+        territorios: {}
     };
+    let territorios = {};  // Add this line
+    let expandedStates = new Set();
+    let isFirstTime = false;
+
+    function salvarDados() {
+      dadosApp.territorios = territorios;  // Garante que os territórios estão sincronizados
+      localStorage.setItem('dadosApp', JSON.stringify(dadosApp));
+    }
 
     function salvarTerritorios() {
-      localStorage.setItem('territorios', JSON.stringify(territorios));
+      dadosApp.territorios = territorios;
+      salvarDados();
     }
 
-    function carregarTerritorios() {
-      const dados = localStorage.getItem('territorios');
-      if (dados) {
-        let dadosCarregados = JSON.parse(dados);
-        // Migração de dados para o novo formato de endereço
-        for (const bairro in dadosCarregados) {
-          dadosCarregados[bairro].forEach(t => {
-            t.enderecos = t.enderecos.map(e => {
-              if (typeof e === 'string') {
-                // Formato antigo: "Rua Exemplo, 123"
-                const parts = e.split(',');
-                return { rua: parts[0] || e, numero: parts[1] || '', bairro: bairro, cidade: '', estado: '', notas: '', lat: 0, lng: 0 };
-              }
-              if (e && typeof e === 'object' && e.endereco && !e.rua) {
-                // Formato intermediário: { endereco: "...", notas: "..." }
-                const parts = e.endereco.split(',');
-                return { rua: parts[0] || e.endereco, numero: parts[1] || '', bairro: bairro, cidade: '', estado: '', notas: e.notas || '', lat: 0, lng: 0 };
-              }
-              // Garante que o campo estado exista
-              if (e && typeof e === 'object' && !e.hasOwnProperty('estado')) {
-                e.estado = '';
-              }
-              return e; // Já está no formato novo ou é inválido
-            });
-          });
-        }
-        territorios = dadosCarregados;
-        atualizarLista();
+    function carregarDados() {
+  const dados = localStorage.getItem('dadosApp');
+  if (dados) {
+    try {
+      dadosApp = JSON.parse(dados);
+      territorios = dadosApp.territorios || {};  // Garante que territorios seja sincronizado
+      
+      // Atualiza campos do perfil
+      document.getElementById('nomePublicador').value = dadosApp.perfil.nome || '';
+      document.getElementById('congregacao').value = dadosApp.perfil.congregacao || '';
+      document.getElementById('cidadePadrao').value = dadosApp.perfil.cidade || '';
+      
+      // Atualiza a visualização do perfil
+      document.getElementById('viewNome').textContent = dadosApp.perfil.nome || '(não definido)';
+      document.getElementById('viewCongregacao').textContent = dadosApp.perfil.congregacao || '(não definida)';
+      document.getElementById('viewCidade').textContent = dadosApp.perfil.cidade || '(não definida)';
+      
+      if (dadosApp.perfil.nome || dadosApp.perfil.congregacao || dadosApp.perfil.cidade) {
+        toggleProfileMode('view');
+      } else {
+        toggleProfileMode('edit');
       }
+      
+      atualizarLista();
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
     }
+  }
+}
+
+// Atualizar window.onload para garantir que os dados são carregados corretamente
+window.onload = function() {
+  const dados = localStorage.getItem('dadosApp');
+  if (dados) {
+    try {
+      dadosApp = JSON.parse(dados);
+      dadosApp = migrarDados(dadosApp);
+      territorios = dadosApp.territorios || {};
+      
+      if (!dadosApp.perfil || !dadosApp.perfil.nome || !dadosApp.perfil.congregacao || !dadosApp.perfil.cidade) {
+        isFirstTime = true;
+        document.getElementById('welcomeModal').classList.remove('hidden');
+      } else {
+        carregarDados();
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      isFirstTime = true;
+      document.getElementById('welcomeModal').classList.remove('hidden');
+    }
+  } else {
+    isFirstTime = true;
+    document.getElementById('welcomeModal').classList.remove('hidden');
+  }
+};
+
+    function salvarPerfil() {
+  const nome = document.getElementById('nomePublicador').value.trim();
+  const congregacao = document.getElementById('congregacao').value.trim();
+  const cidade = document.getElementById('cidadePadrao').value.trim();
+
+  if (!nome || !congregacao || !cidade) {
+    alert('Por favor, preencha todos os campos!');
+    return;
+  }
+
+  dadosApp.perfil = { nome, congregacao, cidade };
+  salvarDados();
+  
+  // Atualiza a visualização
+  document.getElementById('viewNome').textContent = nome;
+  document.getElementById('viewCongregacao').textContent = congregacao;
+  document.getElementById('viewCidade').textContent = cidade;
+  
+  toggleProfileMode('view');
+  alert('Perfil salvo com sucesso!');
+}
+
+function salvarPerfilInicial() {
+        const nome = document.getElementById('initialNome').value.trim();
+        const congregacao = document.getElementById('initialCongregacao').value.trim();
+        const cidade = document.getElementById('initialCidade').value.trim();
+
+        if (!nome || !congregacao || !cidade) {
+            alert('Por favor, preencha todos os campos!');
+            return;
+        }
+
+        dadosApp.perfil = { nome, congregacao, cidade };
+        dadosApp.territorios = territorios;
+        
+        salvarDados();  // Salva tudo no localStorage
+        
+        const welcomeModal = document.getElementById('welcomeModal');
+        welcomeModal.style.display = 'none';
+        welcomeModal.classList.add('hidden');
+        mostrarTela('home');
+        carregarDados();  // Carrega os dados salvos
+        atualizarLista();
+    }
+
+function toggleProfileMode(mode) {
+  const viewMode = document.getElementById('viewProfile');
+  const editMode = document.getElementById('editProfile');
+  
+  if (mode === 'edit') {
+    viewMode.classList.add('hidden');
+    editMode.classList.remove('hidden');
+  } else {
+    viewMode.classList.remove('hidden');
+    editMode.classList.add('hidden');
+  }
+}
 
     function getDistance(coords1, coords2) {
       function toRad(x) {
@@ -427,14 +716,23 @@
     }
 
     function mostrarTela(tela) {
+      const container = document.querySelector('.container');
       document.getElementById("telaCriar").classList.add("hidden");
       document.getElementById("telaEndereco").classList.add("hidden");
-      if (tela === "criar") {
-        document.getElementById("telaCriar").classList.remove("hidden");
-      } else if (tela === "endereco") {
-        document.getElementById("telaEndereco").classList.remove("hidden");
+      document.getElementById("telaConfig").classList.add("hidden");
+      
+      if (tela === "home") {
+        container.classList.add("home");
+      } else {
+        container.classList.remove("home");
+        if (tela === "criar") {
+          document.getElementById("telaCriar").classList.remove("hidden");
+        } else if (tela === "endereco") {
+          document.getElementById("telaEndereco").classList.remove("hidden");
+        } else if (tela === "config") {
+          document.getElementById("telaConfig").classList.remove("hidden");
+        }
       }
-      // Se a tela for 'home' ou qualquer outra, ambas as seções de formulário permanecem ocultas.
     }
 
     function criarTerritorio() {
@@ -461,17 +759,15 @@
       const rua = document.getElementById("ruaInput").value.trim();
       const numero = document.getElementById("numeroInput").value.trim();
       const bairroEndereco = document.getElementById("bairroEndereco").value.trim();
-      const cidadeEndereco = document.getElementById("cidadeEndereco").value.trim();
-      const estadoEndereco = document.getElementById("estadoEndereco").value.trim();
       const notas = document.getElementById("notasEndereco").value.trim();
 
-      if (!rua || !numero || !bairroEndereco || !cidadeEndereco || !estadoEndereco) {
-        alert("Preencha os campos de rua, número, bairro, cidade e estado!");
+      if (!rua || !numero || !bairroEndereco) {
+        alert("Preencha os campos de rua, número e bairro!");
         return;
       }
 
-      const fullAddress = `${rua}, ${numero}, ${bairroEndereco}, ${cidadeEndereco}, ${estadoEndereco}, Brasil`;
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${API_KEY}`);
+      const fullAddress = `${rua}, ${numero}, ${bairroEndereco}`;
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=AIzaSyAHQ5Hofq2sbidxTu8CErNAigz0BfQ4qKg`);
       const data = await response.json();
 
       if (data.status !== "OK") {
@@ -480,7 +776,15 @@
       }
 
       const location = data.results[0].geometry.location; // {lat, lng}
-      const newAddressData = { rua, numero, bairro: bairroEndereco, cidade: cidadeEndereco, estado: estadoEndereco, notas, lat: location.lat, lng: location.lng };
+      const newAddressData = {
+        rua,
+        numero,
+        bairro: bairroEndereco,
+        cidade: dadosApp.perfil.cidade,
+        notas,
+        lat: location.lat,
+        lng: location.lng
+      };
       
       // Lógica para adição manual
       if (territorioManual) {
@@ -512,8 +816,8 @@
           }
         }
 
-        // Se o território mais próximo estiver a menos de 5km
-        if (closestTerritory && minDistance < 5) {
+        // Se o território mais próximo estiver a menos de 8km
+        if (closestTerritory && minDistance < 8) {
           if (closestTerritory.enderecos.length < 8) {
             // Adiciona se houver espaço
             closestTerritory.enderecos.push(newAddressData);
@@ -565,8 +869,6 @@
       document.getElementById("ruaInput").value = "";
       document.getElementById("numeroInput").value = "";
       document.getElementById("bairroEndereco").value = "";
-      document.getElementById("cidadeEndereco").value = "";
-      document.getElementById("estadoEndereco").value = "";
       document.getElementById("notasEndereco").value = "";
     }
 
@@ -652,43 +954,16 @@
       document.getElementById('modalEdicao').style.display = 'none';
     }
 
-    async function editarEndereco(bairro, terIndex, enderIndex) {
+    function editarEndereco(bairro, terIndex, enderIndex) {
       const end = territorios[bairro][terIndex].enderecos[enderIndex];
       const novaRua = prompt("Rua:", end.rua);
       const novoNumero = prompt("Número:", end.numero);
-      const novoBairro = prompt("Bairro:", end.bairro);
-      const novaCidade = prompt("Cidade:", end.cidade);
-      const novoEstado = prompt("Estado (UF):", end.estado);
       const novasNotas = prompt("Notas:", end.notas);
 
-      if (novaRua !== null && novoNumero !== null && novoBairro !== null && novaCidade !== null && novoEstado !== null) {
-        const addressChanged = novaRua.trim() !== end.rua ||
-                               novoNumero.trim() !== end.numero ||
-                               novoBairro.trim() !== end.bairro ||
-                               novaCidade.trim() !== end.cidade ||
-                               novoEstado.trim() !== end.estado;
-
+      if (novaRua !== null && novoNumero !== null) {
         end.rua = novaRua.trim();
         end.numero = novoNumero.trim();
-        end.bairro = novoBairro.trim();
-        end.cidade = novaCidade.trim();
-        end.estado = novoEstado.trim();
         end.notas = novasNotas ? novasNotas.trim() : '';
-
-        if (addressChanged) {
-          const fullAddress = `${end.rua}, ${end.numero}, ${end.bairro}, ${end.cidade}, ${end.estado}, Brasil`;
-          const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${API_KEY}`);
-          const data = await response.json();
-          if (data.status === "OK") {
-            const location = data.results[0].geometry.location;
-            end.lat = location.lat;
-            end.lng = location.lng;
-            alert("Endereço e coordenadas atualizados.");
-          } else {
-            alert("Endereço atualizado, mas não foi possível atualizar as coordenadas.");
-          }
-        }
-
         salvarTerritorios();
         atualizarLista();
         abrirModalEdicao(bairro, terIndex); // Reabre a modal para mostrar a alteração
@@ -704,190 +979,81 @@
       }
     }
 
-    async function gerarUrlRota(enderecos) {
-      if (enderecos.length === 0) return "";
-      
-      const formatAddress = (e) => `${e.rua}, ${e.numero}, ${e.bairro}, ${e.cidade}, ${e.estado || ''}`;
-
-      const baseUrl = "https://www.google.com/maps/dir/?api=1";
-      const origin = `&origin=${encodeURIComponent(formatAddress(enderecos[0]))}`;
-      const destination = `&destination=${encodeURIComponent(formatAddress(enderecos[enderecos.length - 1]))}`;
-      
-      let waypoints = '';
-      if (enderecos.length > 2) {
-        waypoints = '&waypoints=' + enderecos.slice(1, -1).map(e => encodeURIComponent(formatAddress(e))).join('|');
-      }
-      
-      const longUrl = baseUrl + origin + destination + waypoints;
-
-      try {
-        // Usando a API is.gd que suporta CORS com JSONP
-        const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.shorturl) {
-            return data.shorturl;
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao encurtar URL, usando URL longa.", error);
-      }
-      
-      return longUrl;
-    }
-
-    async function gerarRota(enderecos) {
-      if (enderecos.length === 0) {
-        alert("Não há endereços para gerar uma rota.");
-        return;
-      }
-      const url = await gerarUrlRota(enderecos);
-      window.open(url, '_blank');
-    }
-
     async function gerarMensagemWhatsapp(bairro, territorio) {
-      const enderecos = territorio.enderecos;
-      if (enderecos.length === 0) {
+    const enderecos = territorio.enderecos;
+    if (enderecos.length === 0) {
         alert("Não há endereços neste território para gerar a mensagem.");
         return;
-      }
+    }
 
-      const titulo = `${bairro.toUpperCase()} - ${territorio.nome.toUpperCase()}`;
-      const info = "Las direcciones están organizadas em el orden de la ruta mais eficiente possível; sugerimos que las siga em ordem numérico.";
-      const listaEnderecos = enderecos.map((e, i) => {
+    const titulo = `${bairro.toUpperCase()} - ${territorio.nome.toUpperCase()}`;
+    const info = "Las direcciones están organizadas por proximidad; antes de empezar el trabajo, revise el mapa para optimizar su ruta.";
+    const listaEnderecos = enderecos.map((e, i) => {
         let textoEndereco = `${i + 1}. ${e.rua}, ${e.numero}`;
         if (e.notas) {
-          // Adiciona a nota em uma nova linha, abaixo do endereço
-          textoEndereco += `\n   *Nota: ${e.notas}*`;
+            textoEndereco += `\n   *Nota: ${e.notas}*`;
         }
         return textoEndereco;
-      }).join('\n\n'); // Adiciona um espaço extra entre os endereços
-      const pecaAnotacoes = "Envie agora suas anotações de esta tarjeta ao condutor";
-      const linkRota = await gerarUrlRota(enderecos);
+    }).join('\n\n');
+    const pecaAnotacoes = "Envie ahora las informaciones de esta tarjeta para el conductor!";
 
-      const mensagem = `${titulo}\n\n${info}\n\n${listaEnderecos}\n\n${pecaAnotacoes}\n\n${linkRota}`;
+    const mensagem = `${titulo}\n\n${info}\n\n${listaEnderecos}\n\n${pecaAnotacoes}`;
 
-      navigator.clipboard.writeText(mensagem).then(() => {
-        alert("Mensagem copiada para a área de transferência!");
-        // Atualiza a data de envio
-        territorio.lastSent = new Date().toISOString();
-        salvarTerritorios();
-        atualizarLista();
-      }).catch(err => {
-        console.error("Erro ao copiar mensagem: ", err);
-        alert("Não foi possível copiar a mensagem.");
-      });
+    let copiado = false;
+
+    // Primeiro método: Clipboard API
+    try {
+        await navigator.clipboard.writeText(mensagem);
+        copiado = true;
+    } catch (err) {
+        console.log("Clipboard API falhou, tentando método alternativo...");
     }
 
-    function toggleCard(bodyId, bairro, terIndex) {
-      const body = document.getElementById(bodyId);
-      if (body) {
-        const isOpening = body.style.display !== 'block';
-        // Fecha todos os outros cards abertos
-        document.querySelectorAll('.territorio-body').forEach(b => b.style.display = 'none');
+    // Segundo método: execCommand (fallback)
+    if (!copiado) {
+        const textarea = document.createElement('textarea');
+        textarea.value = mensagem;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
         
-        if (isOpening) {
-          body.style.display = 'block';
-          const territorio = territorios[bairro][terIndex];
-          abrirPreviaMapa(territorio);
-        } else {
-          // Se já estava aberto e foi clicado de novo, fecha o mapa também
-          fecharPreviaMapa();
+        try {
+            copiado = document.execCommand('copy');
+        } catch (err) {
+            console.log("execCommand falhou também");
         }
-      }
+        
+        document.body.removeChild(textarea);
     }
 
-    function abrirPreviaMapa(territorio) {
-      const mapContainer = document.getElementById('map-preview');
-      const mapIframe = document.getElementById('map-iframe');
-      const mapTitle = document.getElementById('map-title');
-      
-      if (!territorio || territorio.enderecos.length === 0) {
-        fecharPreviaMapa();
-        return;
-      }
-
-      mapTitle.textContent = `Rota: ${territorio.nome}`;
-
-      const formatAddress = (e) => `${e.rua}, ${e.numero}, ${e.bairro}, ${e.cidade}, ${e.estado || ''}`;
-
-      const baseUrl = `https://www.google.com/maps/embed/v1/directions?key=${API_KEY}`;
-      const origin = `&origin=${encodeURIComponent(formatAddress(territorio.enderecos[0]))}`;
-      
-      let destination = '';
-      let waypoints = '';
-
-      if (territorio.enderecos.length > 1) {
-        const lastAddress = territorio.enderecos[territorio.enderecos.length - 1];
-        destination = `&destination=${encodeURIComponent(formatAddress(lastAddress))}`;
-      } else {
-        // Se houver apenas um endereço, o destino é o mesmo que a origem
-        destination = `&destination=${encodeURIComponent(formatAddress(territorio.enderecos[0]))}`;
-      }
-
-      if (territorio.enderecos.length > 2) {
-        waypoints = '&waypoints=' + territorio.enderecos.slice(1, -1).map(e => encodeURIComponent(formatAddress(e))).join('|');
-      }
-
-      mapIframe.src = baseUrl + origin + destination + waypoints;
-      mapContainer.classList.remove('hidden');
-    }
-
-    function fecharPreviaMapa() {
-      const mapContainer = document.getElementById('map-preview');
-      const mapIframe = document.getElementById('map-iframe');
-      mapIframe.src = ''; // Limpa o iframe para parar o carregamento
-      mapContainer.classList.add('hidden');
-    }
-
-    function ordenarEnderecosParaRota(enderecos) {
-      if (enderecos.length < 3) {
-        return enderecos; // Não precisa ordenar para 0, 1 ou 2 endereços
-      }
-
-      let naoVisitados = [...enderecos];
-      let rotaOrdenada = [];
-
-      // Começa com o primeiro endereço da lista original como ponto de partida
-      let atual = naoVisitados.shift();
-      rotaOrdenada.push(atual);
-
-      while (naoVisitados.length > 0) {
-        let maisProximo = null;
-        let menorDistancia = Infinity;
-        let indiceMaisProximo = -1;
-
-        for (let i = 0; i < naoVisitados.length; i++) {
-          const distancia = getDistance(atual, naoVisitados[i]);
-          if (distancia < menorDistancia) {
-            menorDistancia = distancia;
-            maisProximo = naoVisitados[i];
-            indiceMaisProximo = i;
-          }
-        }
-
-        if (maisProximo) {
-          atual = maisProximo;
-          rotaOrdenada.push(atual);
-          naoVisitados.splice(indiceMaisProximo, 1);
-        } else {
-          // Caso improvável, para evitar loop infinito
-          break;
-        }
-      }
-
-      return rotaOrdenada;
-    }
-
-    function otimizarRotaTerritorio(bairro, index) {
-      const territorio = territorios[bairro][index];
-      if (territorio && territorio.enderecos.length > 2) {
-        territorio.enderecos = ordenarEnderecosParaRota(territorio.enderecos);
-        salvarTerritorios();
+    // Atualiza o território apenas se a cópia foi bem sucedida
+    if (copiado) {
+        territorio.lastSent = new Date().toISOString();
+        // Atualiza o dadosApp.territorios também
+        dadosApp.territorios = territorios;
+        salvarDados();
         atualizarLista();
-        alert(`Rota para o território "${territorio.nome}" foi otimizada!`);
-      } else {
-        alert("Não há endereços suficientes para otimizar a rota (necessário mais de 2).");
+        alert("Mensagem copiada para a área de transferência!");
+    } else {
+        alert("Não foi possível copiar a mensagem. Por favor, tente novamente.");
+    }
+    }
+
+    function toggleCard(bodyId) {
+      const body = document.getElementById(bodyId);
+      const icon = document.getElementById(`icon-${bodyId}`);
+      if (body) {
+        const isVisible = body.style.display === 'block';
+        body.style.display = isVisible ? 'none' : 'block';
+        icon.textContent = isVisible ? '▶' : '▼';
+        
+        // Save state
+        if (isVisible) {
+            expandedStates.delete(bodyId);
+        } else {
+            expandedStates.add(bodyId);
+        }
       }
     }
 
@@ -910,9 +1076,8 @@
         let enderecosProximos = [];
         for (const endereco of todosEnderecos) {
           const distancia = getDistance(base, endereco);
-          if (distancia < 5) { // Raio de 5km
+          if (distancia < 8) // Raio de 8km
             enderecosProximos.push({ endereco, distancia });
-          }
         }
 
         // Ordena por distância e pega os mais próximos
@@ -925,9 +1090,6 @@
           todosEnderecos = todosEnderecos.filter(e => e !== item.endereco);
         });
 
-        // Otimiza a ordem dos endereços dentro do novo território
-        novoTerritorio.enderecos = ordenarEnderecosParaRota(novoTerritorio.enderecos);
-
         if (!territorios[base.bairro]) {
           territorios[base.bairro] = [];
         }
@@ -939,64 +1101,94 @@
       alert("Territórios reorganizados com sucesso!");
     }
 
-    function exportarTerritorios() {
-      const dataStr = JSON.stringify(territorios, null, 2);
-      const dataBlob = new Blob([dataStr], {type: "application/json"});
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'territorios-backup.json';
-      link.click();
-      URL.revokeObjectURL(url);
+    function exportarDados() {
+        const dataStr = JSON.stringify(dadosApp, null, 2);
+        const dataBlob = new Blob([dataStr], {type: "application/json"});
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'territorios-backup.json';
+        link.click();
+        URL.revokeObjectURL(url);
     }
 
-    function importarTerritorios(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    function migrarDados(dados) {
+    // Se os dados antigos forem apenas territórios
+    if (!dados.perfil && !dados.territorios) {
+        return {
+            perfil: {
+                nome: '',
+                congregacao: '',
+                cidade: ''
+            },
+            territorios: dados // dados antigos são apenas os territórios
+        };
+    }
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const importedData = JSON.parse(e.target.result);
-          // Validação simples
-          if (typeof importedData === 'object' && importedData !== null) {
-            if (confirm("Tem certeza que deseja substituir os dados atuais pelos dados importados?")) {
-              territorios = importedData;
-              salvarTerritorios();
-              atualizarLista();
-              alert("Dados importados com sucesso!");
+    // Se já estiver no formato novo, apenas garante que tem todos os campos
+    if (!dados.perfil) {
+        dados.perfil = {
+            nome: '',
+            congregacao: '',
+            cidade: ''
+        };
+    }
+
+    if (!dados.territorios) {
+        dados.territorios = {};
+    }
+
+    return dados;
+}
+
+    function importarDados(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (typeof importedData === 'object' && importedData !== null) {
+                    if (confirm("Tem certeza que deseja importar estes dados?")) {
+                        // Preserve existing profile data
+                        const currentProfile = dadosApp.perfil;
+                        
+                        // Apply migration
+                        dadosApp = migrarDados(importedData);
+                        
+                        // Restore original profile
+                        dadosApp.perfil = currentProfile;
+                        
+                        territorios = dadosApp.territorios;
+                        salvarDados();
+                        atualizarLista();
+                        alert("Dados importados com sucesso!");
+                    }
+                } else {
+                    throw new Error("Formato de arquivo inválido.");
+                }
+            } catch (error) {
+                alert("Erro ao importar arquivo: " + error.message);
+            } finally {
+                event.target.value = '';
             }
-          } else {
-            throw new Error("Formato de arquivo inválido.");
-          }
-        } catch (error) {
-          alert("Erro ao importar arquivo: " + error.message);
-        } finally {
-          // Limpa o valor do input para permitir importar o mesmo arquivo novamente
-          event.target.value = '';
-        }
-      };
-      reader.readAsText(file);
+        };
+        reader.readAsText(file);
     }
 
     function atualizarFormularios() {
       const selectTerritorio = document.getElementById('territorioManual');
       const bairrosList = document.getElementById('bairros-list');
-      const cidadesList = document.getElementById('cidades-list');
       const ruasList = document.getElementById('ruas-list');
-      const estadosList = document.getElementById('estados-list');
 
       // Limpa campos
       selectTerritorio.innerHTML = '<option value="">Automático</option>';
       bairrosList.innerHTML = '';
-      cidadesList.innerHTML = '';
       ruasList.innerHTML = '';
-      estadosList.innerHTML = '';
 
       const bairrosSet = new Set();
-      const cidadesSet = new Set();
       const ruasSet = new Set();
-      const estadosSet = new Set();
 
       for (const bairroKey in territorios) {
         territorios[bairroKey].forEach((t, index) => {
@@ -1010,107 +1202,185 @@
           bairrosSet.add(bairroKey);
           t.enderecos.forEach(e => {
             ruasSet.add(e.rua);
-            cidadesSet.add(e.cidade);
             bairrosSet.add(e.bairro);
-            if(e.estado) estadosSet.add(e.estado);
           });
         });
       }
 
       bairrosSet.forEach(b => bairrosList.insertAdjacentHTML('beforeend', `<option value="${b}"></option>`));
-      cidadesSet.forEach(c => cidadesList.insertAdjacentHTML('beforeend', `<option value="${c}"></option>`));
       ruasSet.forEach(r => ruasList.insertAdjacentHTML('beforeend', `<option value="${r}"></option>`));
-      estadosSet.forEach(e => estadosList.insertAdjacentHTML('beforeend', `<option value="${e}"></option>`));
     }
 
     function atualizarLista() {
-      const divSugestoes = document.getElementById("sugestoesTerritorios");
-      const divRecentes = document.getElementById("recentesTerritorios");
-      const divLista = document.getElementById("listaTerritorios");
-      const tituloSugestoes = document.getElementById("sugestoes-titulo");
-      const tituloRecentes = document.getElementById("recentes-titulo");
-      
-      divSugestoes.innerHTML = "";
-      divRecentes.innerHTML = "";
-      divLista.innerHTML = "";
-
-      let todosTerritorios = [];
-      for (let bairro in territorios) {
-        territorios[bairro].forEach((t, index) => {
-          todosTerritorios.push({ ...t, bairro, originalIndex: index });
-        });
-      }
-
-      const vinteDiasAtras = new Date();
-      vinteDiasAtras.setDate(vinteDiasAtras.getDate() - 20);
-
-      const sugestoes = todosTerritorios
-        .filter(t => t.lastSent && new Date(t.lastSent) < vinteDiasAtras)
-        .sort((a, b) => new Date(a.lastSent) - new Date(b.lastSent)); // Mais antigos primeiro
-
-      const recentes = todosTerritorios
-        .filter(t => t.lastSent && new Date(t.lastSent) >= vinteDiasAtras)
-        .sort((a, b) => new Date(b.lastSent) - new Date(a.lastSent)); // Mais novos primeiro
-
-      const naoEnviados = todosTerritorios.filter(t => !t.lastSent);
-
-      const sugestoesParaMostrar = sugestoes.slice(0, 3);
-      const recentesParaMostrar = recentes.slice(0, 5);
-
-      const idsMostrados = new Set([
-        ...sugestoesParaMostrar.map(t => `${t.bairro}-${t.originalIndex}`),
-        ...recentesParaMostrar.map(t => `${t.bairro}-${t.originalIndex}`)
-      ]);
-
-      const outros = todosTerritorios.filter(t => !idsMostrados.has(`${t.bairro}-${t.originalIndex}`));
-
-      tituloSugestoes.classList.toggle('hidden', sugestoesParaMostrar.length === 0);
-      tituloRecentes.classList.toggle('hidden', recentesParaMostrar.length === 0);
-
-      const renderTerritorio = (t) => {
-        const cardId = `territorio-body-${t.bairro.replace(/\s/g, '')}-${t.originalIndex}`;
+        const divSugestoes = document.getElementById("sugestoesTerritorios");
+        const divRecentes = document.getElementById("recentesTerritorios");
+        const divLista = document.getElementById("listaTerritorios");
+        const tituloSugestoes = document.getElementById("sugestoes-titulo");
+        const tituloRecentes = document.getElementById("recentes-titulo");
         
-        const lastSentDate = t.lastSent ? new Date(t.lastSent).toLocaleString('pt-BR') : null;
-        const lastSentHtml = lastSentDate ? `<div class="last-sent">Enviado em: ${lastSentDate}</div>` : '';
+        divSugestoes.innerHTML = "";
+        divRecentes.innerHTML = "";
+        divLista.innerHTML = "";
 
-        const enderecosHtml = t.enderecos.map((e, i) => {
-          const notaHtml = e.notas ? ` <em>(${e.notas})</em>` : '';
-          const enderecoTexto = e.rua ? `${e.rua}, ${e.numero}` : e.endereco || 'Endereço inválido';
-          return `${i + 1}. ${enderecoTexto}${notaHtml}`;
-        }).join('<br>');
+        let todosTerritorios = [];
+        for (let bairro in territorios) {
+            territorios[bairro].forEach((t, index) => {
+                todosTerritorios.push({ ...t, bairro, originalIndex: index });
+            });
+        }
 
-        return `
-          <div class="territorio">
-            <div style="width: 100%;">
-              <div class="territorio-header" onclick="toggleCard('${cardId}', '${t.bairro}', ${t.originalIndex})">
-                <div>
-                  <strong>${t.bairro} - ${t.nome}</strong>
-                  ${lastSentHtml}
+        const vinteDiasAtras = new Date();
+        vinteDiasAtras.setDate(vinteDiasAtras.getDate() - 20);
+
+        // Separar territórios por categoria
+        const sugestoes = todosTerritorios
+            .filter(t => t.lastSent && new Date(t.lastSent) < vinteDiasAtras)
+            .sort((a, b) => new Date(a.lastSent) - new Date(b.lastSent));
+
+        const recentes = todosTerritorios
+            .filter(t => t.lastSent && new Date(t.lastSent) >= vinteDiasAtras)
+            .sort((a, b) => new Date(b.lastSent) - new Date(a.lastSent));
+
+        const naoEnviados = todosTerritorios.filter(t => !t.lastSent);
+
+        // Funções auxiliares para renderização
+        const renderTerritorioCard = (t) => {
+            const cardId = `territorio-body-${t.bairro.replace(/\s/g, '')}-${t.originalIndex}`;
+            const isExpanded = expandedStates.has(cardId);
+            
+            const lastSentDate = t.lastSent ? new Date(t.lastSent).toLocaleString('pt-BR') : null;
+            const lastSentHtml = lastSentDate ? `<div class="last-sent">Enviado em: ${lastSentDate}</div>` : '';
+
+            const enderecosHtml = t.enderecos.map((e, i) => {
+                const notaHtml = e.notas ? ` <em>(${e.notas})</em>` : '';
+                const enderecoTexto = e.rua ? `${e.rua}, ${e.numero}` : e.endereco || 'Endereço inválido';
+                return `${i + 1}. ${enderecoTexto}${notaHtml}`;
+            }).join('<br>');
+
+            return `
+                <div class="territorio">
+                    <div style="width: 100%;">
+                        <div class="territorio-header" onclick="toggleCard('${cardId}')">
+                            <div class="territorio-info">
+                                <strong>${t.bairro} - ${t.nome}</strong>
+                                ${lastSentHtml}
+                            </div>
+                            <div class="territorio-botoes">
+                                <button class="edit-addr-btn" title="Editar Endereços" onclick="event.stopPropagation(); abrirModalEdicao('${t.bairro}', ${t.originalIndex})">&#128221;</button>
+                                <button class="edit-btn" title="Editar" onclick="event.stopPropagation(); editarNomeTerritorio('${t.bairro}', ${t.originalIndex})">&#9998;</button>
+                                <button class="whatsapp-btn" title="Copiar Mensagem" onclick="event.stopPropagation(); gerarMensagemWhatsapp('${t.bairro}', territorios['${t.bairro}'][${t.originalIndex}])">&#128203;</button>
+                                <button class="delete-btn" title="Excluir" onclick="event.stopPropagation(); excluirTerritorio('${t.bairro}', ${t.originalIndex})">&#128465;</button>
+                            </div>
+                        </div>
+                        <div class="territorio-body" id="${cardId}" style="display: ${isExpanded ? 'block' : 'none'}">
+                            <strong>Endereços:</strong><br>
+                            ${enderecosHtml || 'Nenhum endereço adicionado.'}
+                        </div>
+                    </div>
                 </div>
-                <div class="territorio-botoes">
-                  <button class="edit-addr-btn" title="Editar Endereços" onclick="event.stopPropagation(); abrirModalEdicao('${t.bairro}', ${t.originalIndex})">&#128221;</button>
-                  <button class="edit-btn" title="Editar" onclick="event.stopPropagation(); editarNomeTerritorio('${t.bairro}', ${t.originalIndex})">&#9998;</button>
-                  <button class="whatsapp-btn" title="Copiar Mensagem" onclick="event.stopPropagation(); gerarMensagemWhatsapp('${t.bairro}', territorios['${t.bairro}'][${t.originalIndex}])">&#128203;</button>
-                  <button class="route-btn" title="Otimizar Rota" onclick="event.stopPropagation(); otimizarRotaTerritorio('${t.bairro}', ${t.originalIndex})">&#x1F504;</button>
-                  <button class="route-btn" title="Gerar Rota" onclick="event.stopPropagation(); gerarRota(territorios['${t.bairro}'][${t.originalIndex}].enderecos)">&#128736;</button>
-                  <button class="delete-btn" title="Excluir" onclick="event.stopPropagation(); excluirTerritorio('${t.bairro}', ${t.originalIndex})">&#128465;</button>
+            `;
+        };
+
+        const renderBairroGrupo = (territorios, bairro, section) => {
+            const grupoId = `grupo-${section}-${bairro.replace(/\s/g, '')}`;
+            const isExpanded = expandedStates.has(grupoId);
+            return `
+                <div class="bairro-grupo">
+                    <div class="bairro-grupo-header" onclick="toggleCard('${grupoId}')">
+                        <span class="toggle-icon" id="icon-${grupoId}">${isExpanded ? '▼' : '▶'}</span>
+                        <h3>${bairro} (${territorios.length})</h3>
+                    </div>
+                    <div class="bairro-grupo-content" id="${grupoId}" style="display: ${isExpanded ? 'block' : 'none'}">
+                        ${territorios.map(t => renderTerritorioCard(t)).join('')}
+                    </div>
                 </div>
-              </div>
-              <div class="territorio-body" id="${cardId}">
-                <strong>Endereços:</strong><br>
-                ${enderecosHtml || 'Nenhum endereço adicionado.'}
-              </div>
-            </div>
-          </div>
-        `;
-      };
+            `;
+        };
 
-      sugestoesParaMostrar.forEach(t => divSugestoes.insertAdjacentHTML('beforeend', renderTerritorio(t)));
-      recentesParaMostrar.forEach(t => divRecentes.insertAdjacentHTML('beforeend', renderTerritorio(t)));
-      outros.forEach(t => divLista.insertAdjacentHTML('beforeend', renderTerritorio(t)));
+        // Renderizar sugestões agrupadas por bairro
+        if (sugestoes.length > 0) {
+            tituloSugestoes.classList.remove('hidden');
+            const sugestoesPorBairro = groupByBairro(sugestoes);
+            for (const [bairro, territorios] of Object.entries(sugestoesPorBairro)) {
+                divSugestoes.insertAdjacentHTML('beforeend', renderBairroGrupo(territorios, bairro, 'sugestoes'));
+            }
+        } else {
+            tituloSugestoes.classList.add('hidden');
+        }
 
-      atualizarFormularios();
+        // Renderizar recentes agrupados por bairro
+        if (recentes.length > 0) {
+            tituloRecentes.classList.remove('hidden');
+            const recentesPorBairro = groupByBairro(recentes);
+            for (const [bairro, territorios] of Object.entries(recentesPorBairro)) {
+                divRecentes.insertAdjacentHTML('beforeend', renderBairroGrupo(territorios, bairro, 'recentes'));
+            }
+        } else {
+            tituloRecentes.classList.add('hidden');
+        }
+
+        // Renderizar outros territórios agrupados por bairro
+        const outrosPorBairro = groupByBairro(naoEnviados);
+        for (const [bairro, territorios] of Object.entries(outrosPorBairro)) {
+            divLista.insertAdjacentHTML('beforeend', renderBairroGrupo(territorios, bairro, 'outros'));
+        }
+
+        atualizarFormularios();
     }
+
+    // Função auxiliar para agrupar territórios por bairro
+    function groupByBairro(territorios) {
+        return territorios.reduce((groups, t) => {
+            if (!groups[t.bairro]) {
+                groups[t.bairro] = [];
+            }
+            groups[t.bairro].push(t);
+            return groups;
+        }, {});
+    }
+
+    function toggleBairrosList(event) {
+    event.preventDefault();
+    const lista = document.getElementById('bairrosList');
+    const button = event.target;
+    const isVisible = lista.classList.toggle('visible');
+    button.textContent = isVisible ? '▲' : '▼';
+
+    // Populate list if it's being shown
+    if (isVisible) {
+        lista.innerHTML = '';
+        const bairros = Object.keys(territorios).sort();
+        bairros.forEach(bairro => {
+            const li = document.createElement('li');
+            li.textContent = bairro;
+            li.onclick = () => {
+                document.getElementById('bairro').value = bairro;
+                lista.classList.remove('visible');
+                button.textContent = '▼';
+            };
+            lista.appendChild(li);
+        });
+
+        // Add message if no neighborhoods exist
+        if (bairros.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'Nenhum bairro cadastrado';
+            li.style.fontStyle = 'italic';
+            li.style.color = 'var(--outline-color)';
+            lista.appendChild(li);
+        }
+    }
+}
+
+// Add click outside handler to close the list
+document.addEventListener('click', function(event) {
+    const lista = document.getElementById('bairrosList');
+    const button = event.target;
+    if (!lista.contains(event.target) && !button.classList.contains('toggle-btn')) {
+        lista.classList.remove('visible');
+        document.querySelector('.toggle-btn').textContent = '▼';
+    }
+});
   </script>
 </body>
 </html>
