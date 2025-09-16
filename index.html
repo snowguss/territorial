@@ -495,7 +495,7 @@
 <body>
   <header class="app-header">
     <button id="home-btn" class="header-btn" onclick="mostrarTela('home')">&#127968;</button>
-    <h1>Territorial</h1>
+    <h1><strong>Territorial</strong></h1>
     <button id="hamburger-btn" class="header-btn" onclick="toggleHamburgerMenu()">&#9776;</button>
   </header>
 
@@ -562,6 +562,11 @@
               <p><strong>Nome:</strong> <span id="viewNome"></span></p>
               <p><strong>Congregação:</strong> <span id="viewCongregacao"></span></p>
               <p><strong>Cidade:</strong> <span id="viewCidade"></span></p>
+            </div>
+            <div class="stats-info" style="margin: 16px 0; padding: 16px; background: var(--surface-container-high); border-radius: 8px;">
+              <h4 style="margin-top: 0; color: var(--primary-color);">Estatísticas</h4>
+              <p><strong>Total de Territórios:</strong> <span id="totalTerritorios">0</span></p>
+              <p><strong>Total de Endereços:</strong> <span id="totalEnderecos">0</span></p>
             </div>
             <button onclick="toggleProfileMode('edit')" style="margin-bottom: 24px;">Editar Perfil</button>
           </div>
@@ -783,9 +788,28 @@ function toggleProfileMode(mode) {
     viewMode.classList.add('hidden');
     editMode.classList.remove('hidden');
   } else {
+    // Atualizar contadores antes de mostrar
+    const totais = calcularTotais();
+    document.getElementById('totalTerritorios').textContent = totais.territorios;
+    document.getElementById('totalEnderecos').textContent = totais.enderecos;
+    
     viewMode.classList.remove('hidden');
     editMode.classList.add('hidden');
   }
+}
+
+function calcularTotais() {
+  let totalTerritorios = 0;
+  let totalEnderecos = 0;
+
+  for (const bairro in territorios) {
+    totalTerritorios += territorios[bairro].length;
+    for (const territorio of territorios[bairro]) {
+      totalEnderecos += territorio.enderecos.length;
+    }
+  }
+
+  return { territorios: totalTerritorios, enderecos: totalEnderecos };
 }
 
     function getDistance(coords1, coords2) {
@@ -1132,12 +1156,12 @@ function toggleProfileMode(mode) {
         return;
     }
 
-    const titulo = `${bairro.toUpperCase()} - ${territorio.nome.toUpperCase()}`;
+    const titulo = `*${bairro.toUpperCase()} - ${territorio.nome.toUpperCase()}*`;
     const info = "Las direcciones están organizadas por proximidad; antes de empezar el trabajo, revise el mapa para optimizar su ruta.";
     const listaEnderecos = enderecos.map((e, i) => {
-        let textoEndereco = `${i + 1}. ${e.rua}, ${e.numero}`;
+        let textoEndereco = `${i + 1}. *${e.rua}, ${e.numero}*`;
         if (e.notas) {
-            textoEndereco += `\n   *Nota: ${e.notas}*`;
+            textoEndereco += `\n   (${e.notas})`;
         }
         return textoEndereco;
     }).join('\n\n');
