@@ -647,6 +647,7 @@
   <script src="config.js"></script>
   
   <script>
+window.MAPS_API_KEY = process.env.MAPS_API_KEY || 'AIzaSyAHQ5Hofq2sbidxTu8CErNAigz0BfQ4qKg';
     const domUtils = {
       getElement: (id) => document.getElementById(id),
       getToggleButton: (targetId) => document.querySelector(`button[data-target="${targetId}"]`),
@@ -926,7 +927,7 @@ function calcularTotais() {
         const fullAddress = `${rua}, ${numero}, ${bairroEndereco}, ${dadosApp.perfil.cidade}`;
         
         feedback.loading.show();
-        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${window.MAPS_API_KEY}`);
+        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${MAPS_API_KEY}`);
         const data = await response.json();
 
         if (data.status !== "OK") {
@@ -1421,7 +1422,7 @@ function calcularTotais() {
             const lastSentHtml = lastSentDate ? `<div class="last-sent">Enviado em: ${lastSentDate}</div>` : '';
 
             const enderecosHtml = t.enderecos.map((e, i) => {
-                const notaHtml = e.notas ? ` <em>(${e.notas})</em>` : '';
+                const notaHtml = e.notas ? ` <em>(${e.notas})` : '';
                 const enderecoTexto = e.rua ? `${e.rua}, ${e.numero}` : e.endereco || 'Endereço inválido';
                 return `${i + 1}. ${enderecoTexto}${notaHtml}`;
             }).join('<br>');
