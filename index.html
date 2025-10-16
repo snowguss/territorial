@@ -647,7 +647,9 @@
   <script src="config.js"></script>
   
   <script>
-window.MAPS_API_KEY = process.env.MAPS_API_KEY || 'AIzaSyAHQ5Hofq2sbidxTu8CErNAigz0BfQ4qKg';
+    const API_KEY = 'AIzaSyAHQ5Hofq2sbidxTu8CErNAigz0BfQ4qKg';
+    window.MAPS_API_KEY = API_KEY;
+
     const domUtils = {
       getElement: (id) => document.getElementById(id),
       getToggleButton: (targetId) => document.querySelector(`button[data-target="${targetId}"]`),
@@ -855,23 +857,42 @@ function calcularTotais() {
     }
 
     function criarTerritorio() {
-      let bairro = domUtils.getBairroInput().value.trim();
-      let nome = document.getElementById("nomeTerritorio").value.trim();
-      if (!bairro || !nome) {
+    let bairro = domUtils.getBairroInput().value.trim();
+    let nome = document.getElementById("nomeTerritorio").value.trim();
+    
+    if (!bairro || !nome) {
         feedback.toast("Preencha todos os campos!", 'error');
         return;
-      }
-
-      if (!territorios[bairro]) {
-        territorios[bairro] = [];
-      }
-      territorios[bairro].push({ nome, enderecos: [] });
-      salvarTerritorios();
-      atualizarLista();
-      feedback.toast("Território criado!", 'success');
-      domUtils.getBairroInput().value = "";
-      document.getElementById("nomeTerritorio").value = "";
     }
+
+    // Inicializa o array do bairro se não existir
+    if (!territorios[bairro]) {
+        territorios[bairro] = [];
+    }
+
+    // Cria o novo território
+    const novoTerritorio = {
+        nome: nome,
+        enderecos: []
+    };
+
+    // Adiciona ao array de territórios do bairro
+    territorios[bairro].push(novoTerritorio);
+
+    // Salva os dados
+    dadosApp.territorios = territorios;
+    salvarDados();
+    
+    // Atualiza a interface
+    atualizarLista();
+    
+    // Limpa os campos
+    domUtils.getBairroInput().value = "";
+    document.getElementById("nomeTerritorio").value = "";
+    
+    // Feedback para o usuário
+    feedback.toast("Território criado com sucesso!", 'success');
+}
 
     // Adicionar utilitários para feedback
     const feedback = {
@@ -908,137 +929,148 @@ function calcularTotais() {
       }
     };
 
-    // Atualizar função de adicionar endereço
-    async function adicionarEndereco() {
-      const btn = event.target;
-      feedback.setButtonLoading(btn, true);
+    // Substitua a função adicionarEndereco existente por esta:
 
-      try {
-        const territorioManual = domUtils.getElement('territorioManual').value;
-        const rua = domUtils.getElement('rua-input').value.trim();
-        const numero = domUtils.getElement('numeroInput').value.trim();
-        const bairroEndereco = domUtils.getElement('bairro-endereco').value.trim();
-        
-        if (!rua || !numero || !bairroEndereco) {
-          feedback.toast('Preencha todos os campos obrigatórios', 'error');
-          return;
-        }
+async function adicionarEndereco() {
+  const btn = event.target;
+  feedback.setButtonLoading(btn, true);
 
-        const fullAddress = `${rua}, ${numero}, ${bairroEndereco}, ${dadosApp.perfil.cidade}`;
-        
-        feedback.loading.show();
-        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${MAPS_API_KEY}`);
-        const data = await response.json();
+  try {
+    const territorioManual = domUtils.getElement('territorioManual').value;
+    const rua = domUtils.getElement('rua-input').value.trim();
+    const numero = domUtils.getElement('numeroInput').value.trim();
+    const bairroEndereco = domUtils.getElement('bairro-endereco').value.trim();
+    
+    if (!rua || !numero || !bairroEndereco) {
+      feedback.toast('Preencha todos os campos obrigatórios', 'error');
+      return;
+    }
 
-        if (data.status !== "OK") {
-          throw new Error(data.status === "ZERO_RESULTS" ? 
-            "Endereço não encontrado. Tente adicionar o CEP ou nome completo da rua e bairro" : 
-            "Erro ao buscar endereço. Tente novamente em alguns instantes");
-        }
+    const fullAddress = `${rua}, ${numero}, ${bairroEndereco}, ${dadosApp.perfil.cidade}`;
+    
+    feedback.loading.show();
+    
+    // Usando a chave diretamente
+    const API_KEY = 'AIzaSyAHQ5Hofq2sbidxTu8CErNAigz0BfQ4qKg';
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${API_KEY}`
+    );
 
-        const location = data.results[0].geometry.location; // {lat, lng}
-        const newAddressData = {
-          rua,
-          numero,
-          bairro: bairroEndereco,
-          cidade: dadosApp.perfil.cidade,
-          notas: '',
-          lat: location.lat,
-          lng: location.lng
-        };
-        
-        // Lógica para adição manual
-        if (territorioManual) {
-          const [bairroKey, terIndex] = territorioManual.split(';');
-          const targetTerritory = territorios[bairroKey][terIndex];
-          if (targetTerritory.enderecos.length >= 8) {
-            feedback.toast(`O território "${targetTerritory.nome}" já está cheio. Não é possível adicionar mais endereços.`, 'error');
-            return;
+    if (!response.ok) {
+      throw new Error('Erro na requisição do Google Maps API');
+    }
+
+    const data = await response.json();
+
+    if (data.status !== "OK") {
+      throw new Error(data.status === "ZERO_RESULTS" ? 
+        "Endereço não encontrado. Tente adicionar o CEP ou nome completo da rua e bairro" : 
+        "Erro ao buscar endereço. Tente novamente em alguns instantes");
+    }
+
+    const location = data.results[0].geometry.location; // {lat, lng}
+    const newAddressData = {
+      rua,
+      numero,
+      bairro: bairroEndereco,
+      cidade: dadosApp.perfil.cidade,
+      notas: '',
+      lat: location.lat,
+      lng: location.lng
+    };
+    
+    // Lógica para adição manual
+    if (territorioManual) {
+      const [bairroKey, terIndex] = territorioManual.split(';');
+      const targetTerritory = territorios[bairroKey][terIndex];
+      if (targetTerritory.enderecos.length >= 8) {
+        feedback.toast(`O território "${targetTerritory.nome}" já está cheio. Não é possível adicionar mais endereços.`, 'error');
+        return;
+      }
+      targetTerritory.enderecos.push(newAddressData);
+      feedback.toast(`Endereço adicionado manualmente ao território ${targetTerritory.nome}.`, 'success');
+    } else {
+      // Lógica de alocação automática
+      let bairro = data.results[0].address_components.find(c => c.types.includes("sublocality") || c.types.includes("political"))?.long_name || bairroEndereco;
+
+      let allTerritories = Object.values(territorios).flat();
+      let closestTerritory = null;
+      let minDistance = Infinity;
+
+      // Encontra o território mais próximo
+      for (const t of allTerritories) {
+        if (t.enderecos.length > 0) {
+          const baseCoords = t.enderecos[0]; // O primeiro endereço é a base
+          const distance = getDistance(baseCoords, newAddressData);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestTerritory = t;
           }
-          targetTerritory.enderecos.push(newAddressData);
-          feedback.toast(`Endereço adicionado manualmente ao território ${targetTerritory.nome}.`, 'success');
+        }
+      }
+
+      // Se o território mais próximo estiver a menos de 8km
+      if (closestTerritory && minDistance < 8) {
+        if (closestTerritory.enderecos.length < 8) {
+          // Adiciona se houver espaço
+          closestTerritory.enderecos.push(newAddressData);
+          feedback.toast(`Endereço adicionado ao território ${closestTerritory.nome}.`, 'success');
         } else {
-          // Lógica de alocação automática
-          let bairro = data.results[0].address_components.find(c => c.types.includes("sublocality") || c.types.includes("political"))?.long_name || bairroEndereco;
+          // Reorganiza se estiver cheio
+          feedback.toast(`Território ${closestTerritory.nome} está cheio. Tentando reorganizar...`, 'info');
+          
+          // Encontra o endereço mais distante da base no território cheio
+          let farthestAddress = null;
+          let maxDistance = -1;
+          let farthestIndex = -1;
 
-          let allTerritories = Object.values(territorios).flat();
-          let closestTerritory = null;
-          let minDistance = Infinity;
-
-          // Encontra o território mais próximo
-          for (const t of allTerritories) {
-            if (t.enderecos.length > 0) {
-              const baseCoords = t.enderecos[0]; // O primeiro endereço é a base
-              const distance = getDistance(baseCoords, newAddressData);
-              if (distance < minDistance) {
-                minDistance = distance;
-                closestTerritory = t;
-              }
+          const baseCoords = closestTerritory.enderecos[0];
+          closestTerritory.enderecos.forEach((addr, index) => {
+            const dist = getDistance(baseCoords, addr);
+            if (dist > maxDistance) {
+              maxDistance = dist;
+              farthestAddress = addr;
+              farthestIndex = index;
             }
+          });
+
+          // Remove o mais distante e adiciona o novo
+          closestTerritory.enderecos.splice(farthestIndex, 1);
+          closestTerritory.enderecos.push(newAddressData);
+          feedback.toast(`Endereço ${farthestAddress.rua} removido de ${closestTerritory.nome} e o novo endereço foi adicionado.`, 'success');
+          
+          // Tenta realocar o endereço removido (lógica simplificada: cria um novo território para ele)
+          const bairroDoRemovido = farthestAddress.bairro;
+          const newTerritoryName = `${bairroDoRemovido} ${territorios[bairroDoRemovido] ? territorios[bairroDoRemovido].length + 1 : 1}`;
+          if (!territorios[bairroDoRemovido]) {
+            territorios[bairroDoRemovido] = [];
           }
-
-          // Se o território mais próximo estiver a menos de 8km
-          if (closestTerritory && minDistance < 8) {
-            if (closestTerritory.enderecos.length < 8) {
-              // Adiciona se houver espaço
-              closestTerritory.enderecos.push(newAddressData);
-              feedback.toast(`Endereço adicionado ao território ${closestTerritory.nome}.`, 'success');
-            } else {
-              // Reorganiza se estiver cheio
-              feedback.toast(`Território ${closestTerritory.nome} está cheio. Tentando reorganizar...`, 'info');
-              
-              // Encontra o endereço mais distante da base no território cheio
-              let farthestAddress = null;
-              let maxDistance = -1;
-              let farthestIndex = -1;
-
-              const baseCoords = closestTerritory.enderecos[0];
-              closestTerritory.enderecos.forEach((addr, index) => {
-                const dist = getDistance(baseCoords, addr);
-                if (dist > maxDistance) {
-                  maxDistance = dist;
-                  farthestAddress = addr;
-                  farthestIndex = index;
-                }
-              });
-
-              // Remove o mais distante e adiciona o novo
-              closestTerritory.enderecos.splice(farthestIndex, 1);
-              closestTerritory.enderecos.push(newAddressData);
-              feedback.toast(`Endereço ${farthestAddress.rua} removido de ${closestTerritory.nome} e o novo endereço foi adicionado.`, 'success');
-              
-              // Tenta realocar o endereço removido (lógica simplificada: cria um novo território para ele)
-              const bairroDoRemovido = farthestAddress.bairro;
-              const newTerritoryName = `${bairroDoRemovido} ${territorios[bairroDoRemovido] ? territorios[bairroDoRemovido].length + 1 : 1}`;
-              if (!territorios[bairroDoRemovido]) {
-                territorios[bairroDoRemovido] = [];
-              }
-              territorios[bairroDoRemovido].push({ nome: newTerritoryName, enderecos: [farthestAddress] });
-              feedback.toast(`Um novo território "${newTerritoryName}" foi criado para o endereço removido.`, 'success');
-            }
-          } else {
-            // Cria um novo território se não houver nenhum próximo
-            const newTerritoryName = `${bairro} ${territorios[bairro] ? territorios[bairro].length + 1 : 1}`;
-            if (!territorios[bairro]) territorios[bairro] = [];
-            territorios[bairro].push({ nome: newTerritoryName, enderecos: [newAddressData] });
-            feedback.toast(`Nenhum território próximo. Novo território "${newTerritoryName}" criado.`, 'success');
-          }
+          territorios[bairroDoRemovido].push({ nome: newTerritoryName, enderecos: [farthestAddress] });
+          feedback.toast(`Um novo território "${newTerritoryName}" foi criado para o endereço removido.`, 'success');
         }
-
-        salvarTerritorios();
-        atualizarLista();
-        // Limpar campos
-        domUtils.getElement('rua-input').value = "";
-        domUtils.getElement('numeroInput').value = "";
-        domUtils.getElement('bairro-endereco').value = "";
-      } catch (error) {
-        feedback.toast(error.message, 'error');
-        console.error('Erro:', error);
-      } finally {
-        feedback.loading.hide();
-        feedback.setButtonLoading(btn, false);
+      } else {
+        // Cria um novo território se não houver nenhum próximo
+        const newTerritoryName = `${bairro} ${territorios[bairro] ? territorios[bairro].length + 1 : 1}`;
+        if (!territorios[bairro]) territorios[bairro] = [];
+        territorios[bairro].push({ nome: newTerritoryName, enderecos: [newAddressData] });
+        feedback.toast(`Nenhum território próximo. Novo território "${newTerritoryName}" criado.`, 'success');
       }
     }
+
+    salvarTerritorios();
+    atualizarLista();
+    // Limpar campos
+    domUtils.getElement('rua-input').value = "";
+    domUtils.getElement('numeroInput').value = "";
+    domUtils.getElement('bairro-endereco').value = "";
+  } catch (error) {
+    feedback.toast(error.message, 'error');
+    console.error('Erro:', error);
+  } finally {
+    feedback.loading.hide();
+    feedback.setButtonLoading(btn, false);
+  }
+}
 
     function editarNomeTerritorio(bairro, index) {
       const territorio = territorios[bairro][index];
@@ -1554,5 +1586,7 @@ document.addEventListener('click', function(event) {
     }
 });
   </script>
+</body>
+</html>
 </body>
 </html>
