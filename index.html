@@ -557,6 +557,24 @@
       animation: spin 1s linear infinite;
       margin-left: 8px;
     }
+
+    /* Novos estilos para a lista de sugestões */
+.suggestions-list {
+  position: absolute;
+  background: var(--surface-color);
+  border: 1px solid var(--outline-color);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-top: 4px;
+}
+
+.input-with-toggle {
+  position: relative; /* Importante para o posicionamento correto das sugestões */
+}
   </style>
 </head>
 <body>
@@ -616,6 +634,13 @@
             <label for="bairroEndereco">Bairro:</label>
             <input type="text" id="bairro-endereco" list="bairros-autocomplete">
             <datalist id="bairros-autocomplete"></datalist>
+          </div>
+          <div class="form-group">
+            <label for="cepInput">CEP:</label>
+            <div class="input-with-toggle">
+              <input type="text" id="cepInput" maxlength="9" placeholder="00000-000">
+              <div id="cepSuggestions" class="suggestions-list hidden"></div>
+            </div>
           </div>
           <div class="form-group">
             <label for="observacoesInput">Observações:</label>
@@ -1012,9 +1037,11 @@ async function adicionarEndereco() {
     const numero = domUtils.getElement('numeroInput').value.trim();
     const bairroEndereco = domUtils.getElement('bairro-endereco').value.trim();
     const observacoes = domUtils.getElement('observacoesInput').value.trim();
+    const cep = document.getElementById('cepInput').value.trim();
     
+    // Modifique a validação no início da função adicionarEndereco
     if (!rua || !numero || !bairroEndereco) {
-      feedback.toast('Preencha todos os campos obrigatórios', 'error');
+      feedback.toast('Preencha os campos obrigatórios (rua, número e bairro)', 'error');
       return;
     }
 
@@ -1046,6 +1073,7 @@ async function adicionarEndereco() {
       numero,
       bairro: bairroEndereco,
       cidade: dadosApp.perfil.cidade,
+      cep: cep,
       notas: observacoes,
       lat: location.lat,
       lng: location.lng
@@ -1658,8 +1686,145 @@ document.addEventListener('click', function(event) {
         if (toggleBtn) toggleBtn.textContent = '▼';
     }
 });
+
+function formatCEP(cep) {
+  return cep.replace(/\D/g, '').replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+async function buscarCEPPreditivo(input) {
+  const cep = input.value.replace(/\D/g, '');
+  const suggestionsList = document.getElementById('cepSuggestions');
+
+  if (cep.length < 5) {
+    suggestionsList.classList.add('hidden');
+    return;
+  }
+
+  try {
+    const response = await fetch(`https://viacep.com.br/ws/${dadosApp.perfil.cidade}/json/`);
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+      suggestionsList.classList.add('hidden');
+      return;
+    }
+
+    const sugestoes = data
+      .filter(endereco => endereco.cep.replace(/\D/g, '').startsWith(cep))
+      .slice(0, 5); // Limita a 5 sugestões
+
+    if (sugestoes.length > 0) {
+      suggestionsList.innerHTML = sugestoes
+        .map(endereco => `
+          <div class="suggestion-item" onclick="selecionarCEP('${endereco.cep}', '${endereco.logradouro}', '${endereco.bairro}')">
+            <div class="cep">${endereco.cep}</div>
+            <div class="address">${endereco.logradouro} - ${endereco.bairro}</div>
+          </div>
+        `)
+        .join('');
+      
+      suggestionsList.classList.remove('hidden');
+    } else {
+      suggestionsList.classList.add('hidden');
+    }
+  } catch (error) {
+    console.error('Erro ao buscar CEP:', error);
+    suggestionsList.classList.add('hidden');
+  }
+}
+
+function selecionarCEP(cep, logradouro, bairro) {
+  const cepInput = document.getElementById('cepInput');
+  const ruaInput = document.getElementById('rua-input');
+  const bairroInput = document.getElementById('bairro-endereco');
+  const suggestionsList = document.getElementById('cepSuggestions');
+
+  cepInput.value = cep;
+  
+  // Só atualiza os outros campos se estiverem vazios
+  if (!ruaInput.value.trim()) {
+    ruaInput.value = logradouro;
+  }
+  if (!bairroInput.value.trim()) {
+    bairroInput.value = bairro;
+  }
+  
+  suggestionsList.classList.add('hidden');
+}
+
+// Adicione os event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  const ruaInput = document.getElementById('rua-input');
+  const cepInput = document.getElementById('cepInput');
+  
+  // Event listener existente para o CEP
+  cepInput.addEventListener('input', function(e) {
+    e.target.value = formatCEP(e.target.value);
+  });
+
+  // Novo event listener para o campo de rua
+  ruaInput.addEventListener('input', debounce(async function(e) {
+    const rua = e.target.value.trim();
+    if (rua.length < 3) return; // Só busca se tiver pelo menos 3 caracteres
+
+    const ceps = await buscarCEPsPorLogradouro(rua);
+    const suggestionsList = document.getElementById('cepSuggestions');
+    
+    if (ceps.length > 0) {
+      suggestionsList.innerHTML = ceps
+        .map(endereco => `
+          <div class="suggestion-item" onclick="selecionarCEP('${endereco.cep}', '${endereco.logradouro}', '${endereco.bairro}')">
+            <div class="cep">${endereco.cep}</div>
+            <div class="address">${endereco.logradouro} - ${endereco.bairro}</div>
+          </div>
+        `)
+        .join('');
+      
+      // Posiciona a lista de sugestões abaixo do campo CEP
+      const cepInputRect = cepInput.getBoundingClientRect();
+      suggestionsList.style.top = `${cepInputRect.bottom + window.scrollY}px`;
+      suggestionsList.style.left = `${cepInputRect.left}px`;
+      suggestionsList.style.width = `${cepInputRect.width}px`;
+      
+      suggestionsList.classList.remove('hidden');
+    } else {
+      suggestionsList.classList.add('hidden');
+    }
+  }, 500)); // Aguarda 500ms após o último caractere digitado
+});
+
+
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+async function buscarCEPsPorLogradouro(rua) {
+  try {
+    const cidade = dadosApp.perfil.cidade;
+    if (!cidade) {
+      throw new Error('Cidade não configurada');
+    }
+
+    const response = await fetch(`https://viacep.com.br/ws/${encodeURIComponent(cidade)}/${encodeURIComponent(rua)}/json/`);
+    const data = await response.json();
+
+    if (Array.isArray(data)) {
+      return data.slice(0, 5); // Limita a 5 sugestões
+    }
+    return [];
+  } catch (error) {
+    console.error('Erro ao buscar CEPs:', error);
+    return [];
+  }
+}
   </script>
-</body>
-</html>
 </body>
 </html>
