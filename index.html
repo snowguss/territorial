@@ -644,7 +644,16 @@
     <div class="loading-spinner"></div>
   </div>
 
-  <!-- Adicionar antes dos outros scripts -->
+  <!-- Modificar a referência ao script de configuração -->
+  <script>
+    // Fallback para CONFIG caso o arquivo config.js não seja carregado
+    if (typeof CONFIG === 'undefined') {
+      const CONFIG = {
+        GOOGLE_MAPS_API_KEY: ''
+      };
+      console.warn('Arquivo config.js não encontrado. Usando configuração padrão.');
+    }
+  </script>
   <script src="config.js"></script>
   
   <script>
