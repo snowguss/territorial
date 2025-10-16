@@ -86,19 +86,86 @@
         gap: 32px;
     }
 
-    .form-container {
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .list-container {
-      flex: 1.5;
-      min-width: 300px;
-    }
-
     @media (max-width: 1024px) {
       .container {
         flex-direction: column;
+        margin: 12px;
+        padding: 20px;
+      }
+      
+      .form-container, .list-container {
+        min-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin: 8px;
+        padding: 16px;
+      }
+
+      .territorio {
+        padding: 12px;
+      }
+
+      .territorio-header {
+        flex-wrap: wrap;
+      }
+
+      .territorio-botoes {
+        width: 100%;
+        justify-content: space-around;
+        margin-top: 8px;
+      }
+
+      .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 16px;
+      }
+
+      .welcome-content {
+        width: 95%;
+        padding: 20px;
+      }
+
+      body {
+        padding-top: 56px;
+      }
+
+      .app-header {
+        height: 56px;
+      }
+
+      .header-btn {
+        width: 48px;
+        height: 56px;
+      }
+
+      .menu {
+        width: 100%;
+        top: 56px;
+        border-radius: 0;
+      }
+    }
+
+    @media (max-width: 360px) {
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      .form-group {
+        margin-bottom: 12px;
+      }
+
+      input[type="text"] {
+        width: calc(100% - 16px);
+        padding: 8px;
+      }
+
+      button {
+        padding: 10px 16px;
+        font-size: 13px;
       }
     }
 
@@ -550,6 +617,10 @@
             <input type="text" id="bairro-endereco" list="bairros-autocomplete">
             <datalist id="bairros-autocomplete"></datalist>
           </div>
+          <div class="form-group">
+            <label for="observacoesInput">Observações:</label>
+            <input type="text" id="observacoesInput" placeholder="Ex: Apartamento 101, Casa Verde, etc">
+          </div>
           <button onclick="adicionarEndereco()">Adicionar</button>
         </div>
 
@@ -940,6 +1011,7 @@ async function adicionarEndereco() {
     const rua = domUtils.getElement('rua-input').value.trim();
     const numero = domUtils.getElement('numeroInput').value.trim();
     const bairroEndereco = domUtils.getElement('bairro-endereco').value.trim();
+    const observacoes = domUtils.getElement('observacoesInput').value.trim();
     
     if (!rua || !numero || !bairroEndereco) {
       feedback.toast('Preencha todos os campos obrigatórios', 'error');
@@ -974,7 +1046,7 @@ async function adicionarEndereco() {
       numero,
       bairro: bairroEndereco,
       cidade: dadosApp.perfil.cidade,
-      notas: '',
+      notas: observacoes,
       lat: location.lat,
       lng: location.lng
     };
@@ -1063,6 +1135,7 @@ async function adicionarEndereco() {
     domUtils.getElement('rua-input').value = "";
     domUtils.getElement('numeroInput').value = "";
     domUtils.getElement('bairro-endereco').value = "";
+    domUtils.getElement('observacoesInput').value = "";
   } catch (error) {
     feedback.toast(error.message, 'error');
     console.error('Erro:', error);
