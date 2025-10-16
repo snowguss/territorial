@@ -1,0 +1,14 @@
+[build]
+  publish = "."
+
+[build.environment]
+  MAPS_API_KEY = ""
+
+[context.production.environment]
+  MAPS_API_KEY = ""
+
+[context.deploy-preview.environment]
+  MAPS_API_KEY = ""
+
+[context.branch-deploy.environment]
+  MAPS_API_KEY = ""
