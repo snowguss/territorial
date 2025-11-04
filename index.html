@@ -792,6 +792,26 @@
     const API_KEY = 'AIzaSyAHQ5Hofq2sbidxTu8CErNAigz0BfQ4qKg';
     window.MAPS_API_KEY = API_KEY;
 
+    function toggleCard(bodyId) {
+        const body = document.getElementById(bodyId);
+        if (!body) return;
+
+        const icon = document.getElementById(`icon-${bodyId}`);
+        const isVisible = body.style.display === 'block';
+        
+        body.style.display = isVisible ? 'none' : 'block';
+        
+        if (icon) {
+            icon.textContent = isVisible ? '▶' : '▼';
+        }
+        
+        if (isVisible) {
+            expandedStates.delete(bodyId);
+        } else {
+            expandedStates.add(bodyId);
+        }
+    }
+
     const domUtils = {
       getElement: (id) => document.getElementById(id),
       getToggleButton: (targetId) => document.querySelector(`button[data-target="${targetId}"]`),
@@ -1457,6 +1477,28 @@ async function adicionarEndereco() {
         return;
     }
 
+    // Prompt para data e destinatário
+    const hoje = new Date().toISOString().split('T')[0];
+    const dataEnvio = prompt("Data de envio (DD/MM/YYYY):", hoje.split('-').reverse().join('/'));
+    if (!dataEnvio) return;
+
+    const destinatario = prompt("Para quem você está enviando este território?");
+    if (!destinatario || !destinatario.trim()) {
+        feedback.toast("É necessário informar o destinatário.", 'error');
+        return;
+    }
+
+    // Validar e converter a data
+    let dataFormatada;
+    try {
+        const [dia, mes, ano] = dataEnvio.split('/').map(num => parseInt(num, 10));
+        dataFormatada = new Date(ano, mes - 1, dia);
+        if (isNaN(dataFormatada.getTime())) throw new Error();
+    } catch (e) {
+        feedback.toast("Data inválida. Use o formato DD/MM/YYYY", 'error');
+        return;
+    }
+
     const titulo = `*${bairro.toUpperCase()} - ${territorio.nome.toUpperCase()}*`;
     const info = "Las direcciones están organizadas por proximidad; antes de empezar el trabajo, revise el mapa para optimizar su ruta.";
     const listaEnderecos = enderecos.map((e, i) => {
@@ -1472,16 +1514,12 @@ async function adicionarEndereco() {
 
     let copiado = false;
 
-    // Primeiro método: Clipboard API
     try {
         await navigator.clipboard.writeText(mensagem);
         copiado = true;
     } catch (err) {
         console.log("Clipboard API falhou, tentando método alternativo...");
-    }
-
-    // Segundo método: execCommand (fallback)
-    if (!copiado) {
+        
         const textarea = document.createElement('textarea');
         textarea.value = mensagem;
         textarea.style.position = 'fixed';
@@ -1498,95 +1536,115 @@ async function adicionarEndereco() {
         document.body.removeChild(textarea);
     }
 
-    // Atualiza o território apenas se a cópia foi bem sucedida
     if (copiado) {
-        territorio.lastSent = new Date().toISOString();
+        territorio.lastSent = dataFormatada.toISOString();
+        territorio.lastRecipient = destinatario.trim();
         dadosApp.territorios = territorios;
         salvarDados();
         atualizarLista();
-        feedback.toast("Mensagem copiada para a área de transferência!", 'success');
+        feedback.toast(`Mensagem copiada! Território enviado para ${destinatario}`, 'success');
     } else {
         feedback.toast("Não foi possível copiar a mensagem. Por favor, tente novamente.", 'error');
     }
-    }
-
-    function toggleCard(bodyId) {
-  const body = document.getElementById(bodyId);
-  if (!body) return;
-
-  const icon = document.getElementById(`icon-${bodyId}`);
-  const isVisible = body.style.display === 'block';
-  
-  // Toggle body visibility
-  body.style.display = isVisible ? 'none' : 'block';
-  
-  // Update icon if it exists
-  if (icon) {
-    icon.textContent = isVisible ? '▶' : '▼';
-  }
-  
-  // Save state
-  if (isVisible) {
-    expandedStates.delete(bodyId);
-  } else {
-    expandedStates.add(bodyId);
-  }
 }
 
-    function reorganizarTerritorios() {
-      if (!confirm("Isso irá reorganizar todos os endereços em novos territórios baseados na proximidade. Deseja continuar?")) {
-        return;
-      }
+const renderTerritorioCard = (t) => {
+    const cardId = `territorio-body-${t.bairro.replace(/\s/g, '')}-${t.originalIndex}`;
+    const isExpanded = expandedStates.has(cardId);
+    
+    // Format date without time
+    const lastSentDate = t.lastSent ? new Date(t.lastSent).toLocaleDateString('pt-BR') : null;
+    const lastRecipient = t.lastRecipient ? `para ${t.lastRecipient}` : '';
+    const lastSentHtml = lastSentDate ? 
+        `<div class="last-sent">
+            <span>Enviado em: ${lastSentDate}</span>
+            ${lastRecipient ? `<br><span>${lastRecipient}</span>` : ''}
+            <button class="edit-date-btn" title="Editar Data" onclick="event.stopPropagation(); editarDataEnvio('${t.bairro}', ${t.originalIndex})">📅</button>
+        </div>` : '';
 
-      let todosEnderecos = Object.values(territorios).flat().flatMap(t => t.enderecos);
-      territorios = {}; // Limpa todos os territórios existentes
+    const enderecosHtml = t.enderecos.map((e, i) => {
+        const notaHtml = e.notas ? ` <em>(${e.notas})` : '';
+        const enderecoTexto = e.rua ? `${e.rua}, ${e.numero}` : e.endereco || 'Endereço inválido';
+        return `${i + 1}. ${enderecoTexto}${notaHtml}`;
+    }).join('<br>');
 
-      while (todosEnderecos.length > 0) {
-        const base = todosEnderecos.shift(); // Pega o primeiro como nova base
-        const novoTerritorio = {
-          nome: `${base.bairro} ${territorios[base.bairro] ? territorios[base.bairro].length + 1 : 1}`,
-          enderecos: [base]
-        };
+    return `
+        <div class="territorio">
+            <div style="width: 100%;">
+                <div class="territorio-header" onclick="toggleCard('${cardId}')">
+                    <div class="territorio-info">
+                        <strong>${t.bairro} - ${t.nome}</strong>
+                        ${lastSentHtml}
+                    </div>
+                    <div class="territorio-botoes">
+                        <button class="edit-addr-btn" title="Editar Endereços" onclick="event.stopPropagation(); abrirModalEdicao('${t.bairro}', ${t.originalIndex})">&#128221;</button>
+                        <button class="edit-btn" title="Editar" onclick="event.stopPropagation(); editarNomeTerritorio('${t.bairro}', ${t.originalIndex})">&#9998;</button>
+                        <button class="whatsapp-btn" title="Copiar Mensagem" onclick="event.stopPropagation(); gerarMensagemWhatsapp('${t.bairro}', territorios['${t.bairro}'][${t.originalIndex}])">&#128203;</button>
+                        <button class="delete-btn" title="Excluir" onclick="event.stopPropagation(); excluirTerritorio('${t.bairro}', ${t.originalIndex})">&#128465;</button>
+                    </div>
+                </div>
+                <div class="territorio-body" id="${cardId}" style="display: ${isExpanded ? 'block' : 'none'}">
+                    <strong>Endereços:</strong><br>
+                    ${enderecosHtml || 'Nenhum endereço adicionado.'}
+                </div>
+            </div>
+        </div>
+    `;
+};
 
-        // Encontra até 7 endereços próximos
-        let enderecosProximos = [];
-        for (const endereco of todosEnderecos) {
-          const distancia = getDistance(base, endereco);
-          if (distancia < 8) // Raio de 8km
-            enderecosProximos.push({ endereco, distancia });
-        }
+function editarDataEnvio(bairro, index) {
+    const territorio = territorios[bairro][index];
+    const dataAtual = territorio.lastSent ? 
+        new Date(territorio.lastSent).toLocaleDateString('pt-BR') : 
+        new Date().toLocaleDateString('pt-BR');
+    
+    const novaData = prompt("Digite a nova data de envio (DD/MM/YYYY):", dataAtual);
+    if (!novaData) return;
 
-        // Ordena por distância e pega os mais próximos
-        enderecosProximos.sort((a, b) => a.distancia - b.distancia);
+    try {
+        const [dia, mes, ano] = novaData.split('/').map(num => parseInt(num, 10));
+        const dataFormatada = new Date(ano, mes - 1, dia);
         
-        const paraAdicionar = enderecosProximos.slice(0, 7);
-        paraAdicionar.forEach(item => {
-          novoTerritorio.enderecos.push(item.endereco);
-          // Remove o endereço da lista principal
-          todosEnderecos = todosEnderecos.filter(e => e !== item.endereco);
-        });
-
-        if (!territorios[base.bairro]) {
-          territorios[base.bairro] = [];
+        if (isNaN(dataFormatada.getTime())) {
+            throw new Error('Data inválida');
         }
-        territorios[base.bairro].push(novoTerritorio);
-      }
 
-      salvarTerritorios();
-      atualizarLista();
-      feedback.toast("Territórios reorganizados com sucesso!", 'success');
+        territorio.lastSent = dataFormatada.toISOString();
+        salvarTerritorios();
+        atualizarLista();
+        feedback.toast('Data de envio atualizada com sucesso!', 'success');
+    } catch (error) {
+        feedback.toast('Data inválida. Use o formato DD/MM/YYYY', 'error');
     }
+}
 
-    function exportarDados() {
-        const dataStr = JSON.stringify(dadosApp, null, 2);
-        const dataBlob = new Blob([dataStr], {type: "application/json"});
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'territorios-backup.json';
+// Add CSS style for the edit date button
+const style = document.createElement('style');
+style.textContent = `
+    .edit-date-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0 4px;
+        font-size: 14px;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    .edit-date-btn:hover {
+        opacity: 1;
+    }
+    .last-sent {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+`;
+document.head.appendChild(style);
+
         link.click();
         URL.revokeObjectURL(url);
-    }
+    
 
     function migrarDados(dados) {
     // Se os dados antigos forem apenas territórios
@@ -1726,7 +1784,9 @@ async function adicionarEndereco() {
             const isExpanded = expandedStates.has(cardId);
             
             const lastSentDate = t.lastSent ? new Date(t.lastSent).toLocaleString('pt-BR') : null;
-            const lastSentHtml = lastSentDate ? `<div class="last-sent">Enviado em: ${lastSentDate}</div>` : '';
+            const lastRecipient = t.lastRecipient ? `para ${t.lastRecipient}` : '';
+            const lastSentHtml = lastSentDate ? 
+                `<div class="last-sent">Enviado em: ${lastSentDate} ${lastRecipient}</div>` : '';
 
             const enderecosHtml = t.enderecos.map((e, i) => {
                 const notaHtml = e.notas ? ` <em>(${e.notas})` : '';
