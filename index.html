@@ -575,6 +575,48 @@
 .input-with-toggle {
   position: relative; /* Importante para o posicionamento correto das sugestões */
 }
+
+/* Adicione estes estilos ao seu CSS existente */
+.draggable-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin: 4px 0;
+  background: var(--surface-color);
+  border: 1px solid var(--outline-color);
+  border-radius: 8px;
+  cursor: move;
+  transition: background-color 0.2s, transform 0.2s;
+  user-select: none;
+}
+
+.draggable-list li.dragging {
+  opacity: 0.5;
+  background: var(--surface-container-high);
+  transform: scale(1.02);
+}
+
+.draggable-list li:hover {
+  background: var(--surface-container-high);
+}
+
+.drag-handle {
+  cursor: move;
+  padding: 0 8px;
+  color: var(--outline-color);
+}
+
+.address-content {
+  flex: 1;
+  margin: 0 8px;
+}
+
+.address-actions {
+  display: flex;
+  gap: 4px;
+}
+
   </style>
 </head>
 <body>
@@ -710,6 +752,9 @@
       <span class="modal-close" onclick="fecharModal()">&times;</span>
       <h3 id="modal-titulo">Editar Endereços</h3>
       <ul id="modal-enderecos-lista"></ul>
+      <div style="text-align: right; margin-top: 16px;">
+        <button id="salvarOrdemBtn" onclick="confirmarNovaOrdem()">Salvar nova ordem</button>
+      </div>
     </div>
   </div>
 
@@ -742,6 +787,7 @@
 
   <script src="config.js"></script>
   
+  
   <script>
     const API_KEY = 'AIzaSyAHQ5Hofq2sbidxTu8CErNAigz0BfQ4qKg';
     window.MAPS_API_KEY = API_KEY;
@@ -754,6 +800,117 @@
       getBairrosAutocomplete: () => document.getElementById('bairros-autocomplete'),
       getRuasAutocomplete: () => document.getElementById('ruas-autocomplete')
     };
+
+    let draggedItem = null;
+
+function handleDragStart(e) {
+  draggedItem = this;
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', this.getAttribute('data-index'));
+}
+
+function handleDragEnd(e) {
+  this.classList.remove('dragging');
+  draggedItem = null;
+  
+  // Remove as bordas visuais de todos os itens
+  document.querySelectorAll('.draggable-list li').forEach(item => {
+    item.style.borderTop = '';
+    item.style.borderBottom = '';
+  });
+}
+
+function handleDragOver(e) {
+  if (!draggedItem) return;
+  
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  
+  const list = this.parentNode;
+  const bounding = this.getBoundingClientRect();
+  const offset = bounding.y + (bounding.height / 2);
+  
+  if (e.clientY - offset > 0) {
+    this.style.borderBottom = '2px solid var(--primary-color)';
+    this.style.borderTop = '';
+  } else {
+    this.style.borderTop = '2px solid var(--primary-color)';
+    this.style.borderBottom = '';
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  if (!draggedItem || draggedItem === this) return;
+
+  this.style.borderTop = '';
+  this.style.borderBottom = '';
+
+  const list = this.parentNode;
+  const fromIndex = parseInt(draggedItem.getAttribute('data-index'));
+  const toIndex = parseInt(this.getAttribute('data-index'));
+
+  const items = Array.from(list.children);
+  const fromElement = items[fromIndex];
+  const toElement = items[toIndex];
+
+  if (!fromElement || !toElement) return;
+
+  if (fromIndex < toIndex) {
+    list.insertBefore(fromElement, toElement.nextSibling);
+  } else {
+    list.insertBefore(fromElement, toElement);
+  }
+
+  // Reatribui data-index dos itens visualmente
+  Array.from(list.children).forEach((li, index) => li.setAttribute('data-index', index));
+}
+
+function confirmarNovaOrdem() {
+  const modalTitulo = document.getElementById('modal-titulo').textContent;
+  const matches = modalTitulo.match(/Editando:\s*(.*)/);
+  const territorioNome = matches ? matches[1].trim() : null;
+  if (!territorioNome) return;
+
+  // Localiza bairro e índice do território
+  let bairroEncontrado, territorioIndex;
+  for (const bairro in territorios) {
+    const index = territorios[bairro].findIndex(t => t.nome === territorioNome);
+    if (index !== -1) {
+      bairroEncontrado = bairro;
+      territorioIndex = index;
+      break;
+    }
+  }
+
+  if (bairroEncontrado === undefined) return;
+
+  const lista = document.getElementById('modal-enderecos-lista');
+  const territorio = territorios[bairroEncontrado][territorioIndex];
+  const novaOrdem = [];
+
+  // Novo: lê os textos de cada <li> e reconstrói a lista na ordem atual
+  lista.querySelectorAll('li').forEach(li => {
+    const texto = li.querySelector('.address-content').innerText.split('\n')[0];
+    const [rua, numero] = texto.split(',').map(s => s.trim());
+    const encontrado = territorio.enderecos.find(
+      e => e.rua === rua && e.numero === numero
+    );
+    if (encontrado) novaOrdem.push(encontrado);
+  });
+
+  // Salva apenas se a ordem for realmente diferente
+  if (novaOrdem.length === territorio.enderecos.length) {
+    territorios[bairroEncontrado][territorioIndex].enderecos = novaOrdem;
+    salvarTerritorios();
+    feedback.toast('Nova ordem salva com sucesso!', 'success');
+    abrirModalEdicao(bairroEncontrado, territorioIndex);
+  } else {
+    feedback.toast('Erro ao salvar: alguns endereços não foram reconhecidos.', 'error');
+  }
+}
+
 
     let dadosApp = {
         perfil: {
@@ -1236,16 +1393,27 @@ async function adicionarEndereco() {
 
       titulo.textContent = `Editando: ${territorio.nome}`;
       lista.innerHTML = '';
+      lista.className = 'draggable-list';
 
       territorio.enderecos.forEach((end, enderIndex) => {
         const li = document.createElement('li');
+        li.setAttribute('draggable', 'true');
+        li.setAttribute('data-index', enderIndex);
         li.innerHTML = `
-          <span>${end.rua}, ${end.numero}</span>
-          <div>
+          <span class="drag-handle">&#8942;&#8942;</span>
+          <div class="address-content">${end.rua}, ${end.numero}${end.notas ? `<br><small>${end.notas}</small>` : ''}</div>
+          <div class="address-actions">
             <button class="edit-btn" title="Editar Endereço" onclick="editarEndereco('${bairro}', ${terIndex}, ${enderIndex})">&#9998;</button>
             <button class="delete-btn" title="Excluir Endereço" onclick="excluirEndereco('${bairro}', ${terIndex}, ${enderIndex})">&#128465;</button>
           </div>
         `;
+
+        // Adiciona eventos de drag and drop
+        li.addEventListener('dragstart', handleDragStart);
+        li.addEventListener('dragend', handleDragEnd);
+        li.addEventListener('dragover', handleDragOver);
+        li.addEventListener('drop', handleDrop);
+
         lista.appendChild(li);
       });
 
@@ -1343,21 +1511,27 @@ async function adicionarEndereco() {
     }
 
     function toggleCard(bodyId) {
-      const body = document.getElementById(bodyId);
-      const icon = document.getElementById(`icon-${bodyId}`);
-      if (body) {
-        const isVisible = body.style.display === 'block';
-        body.style.display = isVisible ? 'none' : 'block';
-        icon.textContent = isVisible ? '▶' : '▼';
-        
-        // Save state
-        if (isVisible) {
-            expandedStates.delete(bodyId);
-        } else {
-            expandedStates.add(bodyId);
-        }
-      }
-    }
+  const body = document.getElementById(bodyId);
+  if (!body) return;
+
+  const icon = document.getElementById(`icon-${bodyId}`);
+  const isVisible = body.style.display === 'block';
+  
+  // Toggle body visibility
+  body.style.display = isVisible ? 'none' : 'block';
+  
+  // Update icon if it exists
+  if (icon) {
+    icon.textContent = isVisible ? '▶' : '▼';
+  }
+  
+  // Save state
+  if (isVisible) {
+    expandedStates.delete(bodyId);
+  } else {
+    expandedStates.add(bodyId);
+  }
+}
 
     function reorganizarTerritorios() {
       if (!confirm("Isso irá reorganizar todos os endereços em novos territórios baseados na proximidade. Deseja continuar?")) {
@@ -1827,4 +2001,5 @@ async function buscarCEPsPorLogradouro(rua) {
 }
   </script>
 </body>
+</html>
 </html>
