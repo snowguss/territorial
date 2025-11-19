@@ -1,5 +1,8 @@
 // Use the API key from config.js
-const API_KEY = CONFIG.GOOGLE_MAPS_API_KEY;
+const API_KEY = (typeof CONFIG !== 'undefined' && CONFIG.GOOGLE_MAPS_API_KEY) ? CONFIG.GOOGLE_MAPS_API_KEY : '';
+if (!API_KEY) {
+    console.error('CONFIG or GOOGLE_MAPS_API_KEY not found. Make sure config.js is loaded.');
+}
 window.MAPS_API_KEY = API_KEY;
 
 function toggleCard(bodyId) {
