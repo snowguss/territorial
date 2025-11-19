@@ -856,6 +856,18 @@ function migrarDados(dados) {
     return dados;
 }
 
+function exportarDados() {
+    const dataStr = JSON.stringify(dadosApp, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+    const exportFileDefaultName = `territorial_backup_${new Date().toISOString().split('T')[0]}.json`;
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+}
+
 function importarDados(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -864,67 +876,67 @@ function importarDados(event) {
     reader.onload = function (e) {
         try {
             const importedData = JSON.parse(e.target.result);
-            if (typeof importedData === 'object' && importedData !== null) {
-                if (confirm("Tem certeza que deseja importar estes dados?")) {
-                    const currentProfile = dadosApp.perfil;
-                    dadosApp = migrarDados(importedData);
-                    dadosApp.perfil = currentProfile;
-                    territorios = dadosApp.territorios;
-                    salvarDados();
-                    atualizarLista();
-                    feedback.toast("Dados importados com sucesso!", 'success');
-                }
-            } else {
-                throw new Error("Formato de arquivo inválido.");
+
+            // Validação básica
+            if (!importedData.territorios) {
+                throw new Error('Formato de arquivo inválido');
             }
-        } catch (error) {
-            feedback.toast("Erro ao importar arquivo: " + error.message, 'error');
-        } finally {
+
+            // Smart Merge
+            const importedTerritories = importedData.territorios;
+            let addedCount = 0;
+            let updatedCount = 0;
+
+            for (const bairro in importedTerritories) {
+                if (!territorios[bairro]) {
+                    territorios[bairro] = [];
+                }
+
+                importedTerritories[bairro].forEach(importedTerr => {
+                    // Procura território existente pelo nome
+                    const existingIndex = territorios[bairro].findIndex(t => t.nome === importedTerr.nome);
+
+                    if (existingIndex !== -1) {
+                        // ATUALIZA: Mantém dados locais de envio
+                        const existingTerr = territorios[bairro][existingIndex];
+
+                        // Atualiza endereços e outros dados, mas PRESERVA histórico de envio local
+                        territorios[bairro][existingIndex] = {
+                            ...importedTerr,
+                            lastSent: existingTerr.lastSent,
+                            lastRecipient: existingTerr.lastRecipient
+                        };
+                        updatedCount++;
+                    } else {
+                        // NOVO: Limpa dados de envio para não importar histórico de outros
+                        territorios[bairro].push({
+                            ...importedTerr,
+                            lastSent: null,
+                            lastRecipient: null
+                        });
+                        addedCount++;
+                    }
+                });
+            }
+
+            // Atualiza perfil se não existir
+            if (!dadosApp.perfil.nome && importedData.perfil) {
+                dadosApp.perfil = importedData.perfil;
+            }
+
+            salvarTerritorios();
+            atualizarLista();
+            feedback.toast(`Importação concluída! ${addedCount} novos, ${updatedCount} atualizados.`, 'success');
+
+            // Limpa o input para permitir importar o mesmo arquivo novamente se necessário
             event.target.value = '';
+
+        } catch (error) {
+            console.error('Erro na importação:', error);
+            feedback.toast('Erro ao importar arquivo: ' + error.message, 'error');
         }
     };
     reader.readAsText(file);
-}
-
-function atualizarFormularios() {
-    const selectTerritorio = domUtils.getElement('territorioManual');
-    const bairrosAutocomplete = domUtils.getBairrosAutocomplete();
-    const ruasAutocomplete = domUtils.getRuasAutocomplete();
-
-    // Limpar campos
-    selectTerritorio.innerHTML = '<option value="">Automático</option>';
-    bairrosAutocomplete.innerHTML = '';
-    ruasAutocomplete.innerHTML = '';
-
-    const bairrosSet = new Set();
-    const ruasSet = new Set();
-
-    for (const bairroKey in territorios) {
-        territorios[bairroKey].forEach((t, index) => {
-            const option = document.createElement('option');
-            option.value = `${bairroKey};${index}`;
-            option.textContent = t.nome;
-            selectTerritorio.appendChild(option);
-
-            bairrosSet.add(bairroKey);
-            t.enderecos.forEach(e => {
-                ruasSet.add(e.rua);
-                bairrosSet.add(e.bairro);
-            });
-        });
-    }
-
-    bairrosSet.forEach(b => {
-        const option = document.createElement('option');
-        option.value = b;
-        bairrosAutocomplete.appendChild(option);
-    });
-
-    ruasSet.forEach(r => {
-        const option = document.createElement('option');
-        option.value = r;
-        ruasAutocomplete.appendChild(option);
-    });
 }
 
 function atualizarLista() {
@@ -1199,4 +1211,51 @@ async function buscarCEPsPorLogradouro(rua) {
         console.error('Erro ao buscar CEPs:', error);
         return [];
     }
+}
+
+function atualizarFormularios() {
+    const selectTerritorio = document.getElementById('territorioManual');
+    const bairrosAutocomplete = document.getElementById('bairros-autocomplete');
+    const ruasAutocomplete = document.getElementById('ruas-autocomplete');
+
+    if (!selectTerritorio || !bairrosAutocomplete || !ruasAutocomplete) return;
+
+    // Limpar campos
+    selectTerritorio.innerHTML = '<option value="">Automático</option>';
+    bairrosAutocomplete.innerHTML = '';
+    ruasAutocomplete.innerHTML = '';
+
+    const bairrosSet = new Set();
+    const ruasSet = new Set();
+
+    for (const bairroKey in territorios) {
+        territorios[bairroKey].forEach((t, index) => {
+            // Populate Select
+            const option = document.createElement('option');
+            option.value = `${bairroKey};${index}`;
+            option.textContent = `${bairroKey} - ${t.nome}`;
+            selectTerritorio.appendChild(option);
+
+            // Collect data for autocompletes
+            bairrosSet.add(bairroKey);
+            t.enderecos.forEach(e => {
+                if (e.rua) ruasSet.add(e.rua);
+                if (e.bairro) bairrosSet.add(e.bairro);
+            });
+        });
+    }
+
+    // Populate Bairros Autocomplete
+    bairrosSet.forEach(b => {
+        const option = document.createElement('option');
+        option.value = b;
+        bairrosAutocomplete.appendChild(option);
+    });
+
+    // Populate Ruas Autocomplete
+    ruasSet.forEach(r => {
+        const option = document.createElement('option');
+        option.value = r;
+        ruasAutocomplete.appendChild(option);
+    });
 }
